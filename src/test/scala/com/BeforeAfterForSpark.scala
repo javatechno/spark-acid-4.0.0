@@ -26,8 +26,12 @@ object Utils {
 trait HMSContainer extends BeforeAndAfterAll {
   self: Suite with Environment =>
 
+  //У hive 4.0.0 нет коннекта к metastore еще https://github.com/apache/iceberg/issues/11928?ysclid=m6n8j58o3k961953079
+  //Тест валится
+  // [info] com.qubole.spark.hiveacid.HiveAcidTest *** ABORTED ***
+  // [info]   java.lang.NoSuchFieldError: METASTOREWAREHOUSE
   lazy val HMSContainer = {
-    val container = GenericContainer(dockerImage = "apache/hive:3.1.3",
+    val container = GenericContainer(dockerImage = "apache/hive:4.0.0",
       exposedPorts = List(9083),
       env = Map[String, String](
         "HIVE_CUSTOM_CONF_DIR" -> "/hive_custom_conf",
@@ -111,7 +115,11 @@ trait BeforeAfterForSpark extends BeforeAndAfterAll with BeforeAndAfterEach with
     .set("spark.hadoop.hive.metastore.uris", s"thrift://${HMSContainer.host}:${HMSContainer.mappedPort(9083)}")
 //    .set("spark.sql.hive.metastore.version", "2.3.9")
 //    .set("spark.sql.hive.metastore.jars", "maven")
-        .set("spark.sql.hive.metastore.version", "3.1.3")
+//У hive 4.0.0 нет коннекта к metastore еще https://github.com/apache/iceberg/issues/11928?ysclid=m6n8j58o3k961953079
+//Тест валится
+// [info] com.qubole.spark.hiveacid.HiveAcidTest *** ABORTED ***
+//[info]   java.lang.NoSuchFieldError: METASTOREWAREHOUSE
+        .set("spark.sql.hive.metastore.version", "4.0.0")
         .set("spark.sql.hive.metastore.jars", "maven")
 
     .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")

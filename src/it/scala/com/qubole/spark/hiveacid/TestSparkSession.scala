@@ -25,6 +25,10 @@ private[hiveacid] object TestSparkSession {
   def getSession: SparkSession = {
     val spark: SparkSession = SparkSession.builder().appName("Hive-acid-test")
       .master("local[*]")
+      //У hive 4.0.0 нет коннекта к metastore еще https://github.com/apache/iceberg/issues/11928?ysclid=m6n8j58o3k961953079
+      //Тест валится
+      // [info] com.qubole.spark.hiveacid.HiveAcidTest *** ABORTED ***
+      // [info]   java.lang.NoSuchFieldError: METASTOREWAREHOUSE
       .config("spark.hadoop.hive.metastore.uris", "thrift://0.0.0.0:10000")
       .config("spark.sql.warehouse.dir", "/tmp")
       .config("spark.sql.extensions", "com.qubole.spark.hiveacid.HiveAcidAutoConvertExtension")
