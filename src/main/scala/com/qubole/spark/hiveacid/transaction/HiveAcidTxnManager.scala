@@ -17,24 +17,22 @@
 
 package com.qubole.spark.hiveacid.transaction
 
-import java.util.concurrent.{Executors, ScheduledExecutorService, ThreadFactory, TimeUnit}
-import java.util.concurrent.atomic.AtomicBoolean
-import com.qubole.shaded.hadoop.hive.common.{ValidTxnList, ValidTxnWriteIdList, ValidWriteIdList}
-import com.qubole.shaded.hadoop.hive.metastore.api.{DataOperationType, LockRequest, LockResponse, LockState, TxnInfo}
-import com.qubole.shaded.hadoop.hive.metastore.conf.MetastoreConf
-import com.qubole.shaded.hadoop.hive.metastore.txn.TxnUtils
-import com.qubole.shaded.hadoop.hive.metastore.{IMetaStoreClient, LockComponentBuilder, LockRequestBuilder, RetryingMetaStoreClient}
+import com.qubole.shaded.thrift.TException
 import com.qubole.spark.hiveacid.datasource.HiveAcidDataSource
 import com.qubole.spark.hiveacid.hive.HiveConverter
 import com.qubole.spark.hiveacid.{HiveAcidErrors, HiveAcidOperation, SparkAcidConf}
+import org.apache.hadoop.hive.common.{ValidTxnList, ValidTxnWriteIdList, ValidWriteIdList}
+import org.apache.hadoop.hive.metastore.api._
+import org.apache.hadoop.hive.metastore.conf.MetastoreConf
+import org.apache.hadoop.hive.metastore.txn.TxnCommonUtils
+import org.apache.hadoop.hive.metastore.{IMetaStoreClient, LockComponentBuilder, LockRequestBuilder, RetryingMetaStoreClient}
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.SqlUtils
-import com.qubole.shaded.thrift.TException
+import org.apache.spark.sql.{SparkSession, SqlUtils}
 
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.{Executors, ScheduledExecutorService, ThreadFactory, TimeUnit}
 import scala.collection.JavaConverters._
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
-import scala.jdk.CollectionConverters.IterableHasAsJava
 import scala.language.implicitConversions
 
 /**
@@ -198,7 +196,7 @@ private[hiveacid] class HiveAcidTxnManager(sparkSession: SparkSession) extends L
     }
     val tableValidWriteIds = client.getValidWriteIds(List(fullyQualifiedTableName).asJava,
       validTxnList.writeToString())
-    val txnWriteIds: ValidTxnWriteIdList = TxnUtils.createValidTxnWriteIdList(txnId,
+    val txnWriteIds: ValidTxnWriteIdList = TxnCommonUtils.createValidTxnWriteIdList(txnId,
       tableValidWriteIds)
     txnWriteIds.getTableValidWriteIdList(fullyQualifiedTableName)
   }
@@ -249,18 +247,22 @@ private[hiveacid] class HiveAcidTxnManager(sparkSession: SparkSession) extends L
     // may have come and performed write. To protect against the lost write due
     // to above sequence hive maintains write-set and abort conflict transaction
     // optimistically at the commit time.
+    //semiShared = public LockComponentBuilder setSemiShared() {
+    //    component.setType(LockType.SHARED_WRITE);
+    //    return this;
+    //  } in commit 4df4d75 - hive 3.1.3
     def addLockType(lcb: LockComponentBuilder): LockComponentBuilder = {
       operationType match {
         case HiveAcidOperation.INSERT_OVERWRITE =>
           lcb.setExclusive().setOperationType(convertToDataOperationType(operationType))
         case HiveAcidOperation.INSERT_INTO =>
-          lcb.setShared().setOperationType(convertToDataOperationType(operationType))
+          lcb.setSharedWrite().setOperationType(convertToDataOperationType(operationType))
         case HiveAcidOperation.READ =>
-          lcb.setShared().setOperationType(convertToDataOperationType(operationType))
+          lcb.setSharedRead().setOperationType(convertToDataOperationType(operationType))
         case HiveAcidOperation.UPDATE =>
-          lcb.setSemiShared().setOperationType(convertToDataOperationType(operationType))
+          lcb.setSharedWrite().setOperationType(convertToDataOperationType(operationType))
         case HiveAcidOperation.DELETE =>
-          lcb.setSemiShared().setOperationType(convertToDataOperationType(operationType))
+          lcb.setSharedWrite().setOperationType(convertToDataOperationType(operationType))
         case _ =>
           throw HiveAcidErrors.invalidOperationType(operationType.toString)
       }

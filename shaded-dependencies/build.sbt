@@ -13,7 +13,7 @@ scalacOptions ++= Seq(
 	"-unchecked",
 	"-optimise"
 )
-
+javacOptions ++= Seq("-source", "8", "-target", "8")
 scalacOptions in (Compile, doc) ++= Seq(
 	"-no-link-warnings" // Suppresses problems with Scaladoc @throws links
 )
@@ -27,7 +27,7 @@ publishArtifact in (Compile, packageSrc) := false
 
 publishArtifact in (Compile, packageBin) := false
 
-val hive_version = sys.props.getOrElse("hive.version", "3.1.2")
+val hive_version = sys.props.getOrElse("hive.version", "4.0.0")
 
 val orc_version = sys.props.getOrElse("orc.version", "1.5.6")
 
@@ -37,7 +37,7 @@ resolvers += "Additional Maven Repository" at sys.props.getOrElse("hive.repo", "
 libraryDependencies ++= Seq(
 	// Hive/Orc core dependencies packed.
 	"org.apache.hive" % "hive-metastore" % hive_version intransitive(),
-	"org.apache.hive" % "hive-exec" % hive_version intransitive(),
+	"org.apache.hive" % "hive-exec" % "4.0.0" intransitive(),
 	"org.apache.orc" % "orc-core" % orc_version intransitive(),
 	"org.apache.orc" % "orc-mapreduce" % orc_version intransitive(),
 
@@ -81,7 +81,7 @@ assemblyShadeRules in assembly := Seq(
 	ShadeRule.rename("com.readytalk.metrics.**" -> "com.qubole.shaded.readytalk.metrics.@1").inAll
 )
 
-import sbtassembly.AssemblyPlugin.autoImport.{ ShadeRule}
+import sbtassembly.AssemblyPlugin.autoImport.ShadeRule
 import sbtassembly.MergeStrategy
 val distinctAndReplace: sbtassembly.MergeStrategy = new sbtassembly.MergeStrategy {
     val name = "distinctAndReplace"
@@ -146,6 +146,7 @@ assemblyMergeStrategy in assembly := {
 	case "META-INF/io.netty.versions.properties" => MergeStrategy.last
 	case "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat" => MergeStrategy.last
 	case "codegen/config.fmpp" => MergeStrategy.first
+	case PathList("mozilla", "public-suffix-list.txt") => MergeStrategy.first
 
 	case x =>
 			val oldStrategy = (assemblyMergeStrategy in assembly).value

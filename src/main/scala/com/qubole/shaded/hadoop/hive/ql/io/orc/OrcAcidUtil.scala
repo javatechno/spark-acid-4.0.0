@@ -1,9 +1,10 @@
 package com.qubole.shaded.hadoop.hive.ql.io.orc
 
-import java.util.regex.Pattern
-
-import com.qubole.shaded.hadoop.hive.ql.io.AcidUtils
 import org.apache.hadoop.fs.Path
+import org.apache.hadoop.hive.ql.io.AcidUtils
+import org.apache.hadoop.hive.ql.io.orc.{OrcSplit, VectorizedOrcAcidRowBatchReader}
+
+import java.util.regex.Pattern
 
 object OrcAcidUtil {
   val BUCKET_PATTERN = Pattern.compile("bucket_[0-9]{5}$")
@@ -12,7 +13,11 @@ object OrcAcidUtil {
     assert(BUCKET_PATTERN.matcher(orcSplit.getPath.getName).matches())
     val bucket = AcidUtils.parseBucketId(orcSplit.getPath)
     assert(bucket != -1)
-    val deleteDeltaDirPaths = VectorizedOrcAcidRowBatchReader.getDeleteDeltaDirsFromSplit(orcSplit);
+    val deleteDeltaDirPaths = {
+      val method = classOf[VectorizedOrcAcidRowBatchReader].getDeclaredMethod("getDeleteDeltaDirsFromSplit", classOf[OrcSplit])
+      method.setAccessible(true)
+      method.invoke(null, orcSplit).asInstanceOf[Array[Path]]
+    }
     deleteDeltaDirPaths.map(deleteDir => AcidUtils.createBucketFile(deleteDir, bucket))
   }
 }

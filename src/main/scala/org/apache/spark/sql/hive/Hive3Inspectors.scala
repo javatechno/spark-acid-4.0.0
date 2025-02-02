@@ -19,17 +19,21 @@
 
 package org.apache.spark.sql.hive
 
+import org.apache.hadoop.hive.common.`type`.{Date, HiveChar, HiveVarchar, Timestamp}
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory.{binaryTypeInfo, booleanTypeInfo, byteTypeInfo, dateTypeInfo, doubleTypeInfo, floatTypeInfo, getListTypeInfo, getMapTypeInfo, getStructTypeInfo, intTypeInfo, longTypeInfo, shortTypeInfo, stringTypeInfo, timestampTypeInfo, voidTypeInfo}
+import org.apache.hadoop.hive.serde2.typeinfo.{DecimalTypeInfo, TypeInfo}
+
 import java.lang.reflect.{ParameterizedType, Type, WildcardType}
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder, ResolverStyle, SignStyle}
 import java.time.temporal.ChronoField
-
 import scala.collection.JavaConverters._
-import com.qubole.shaded.hadoop.hive.common.`type`.{Date, HiveChar, HiveDecimal, HiveVarchar, Timestamp, TimestampUtils}
-import com.qubole.shaded.hadoop.hive.serde2.{io => hiveIo}
-import com.qubole.shaded.hadoop.hive.serde2.objectinspector.{StructField => HiveStructField, _}
-import com.qubole.shaded.hadoop.hive.serde2.objectinspector.primitive._
-import com.qubole.shaded.hadoop.hive.serde2.typeinfo.{DecimalTypeInfo, TypeInfoFactory}
+//import com.qubole.shaded.hadoop.hive.serde2.{io => hiveIo}
 import com.qubole.spark.hiveacid.AnalysisException
+import org.apache.hadoop.hive.common.`type`.HiveDecimal
+import org.apache.hadoop.hive.serde2.objectinspector.primitive._
+import org.apache.hadoop.hive.serde2.objectinspector.{StructField => HiveStructField, _}
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory
+import org.apache.hadoop.hive.serde2.{io => hiveIo}
 import org.apache.hadoop.{io => hadoopIo}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
@@ -47,7 +51,7 @@ trait Hive3Inspectors {
   val PRINT_FORMATTER = print_formatter
   val PARSE_FORMATTER = parse_formatter
 
-  private def parse_formatter:DateTimeFormatter = {
+  private def parse_formatter: DateTimeFormatter = {
     var builder = new DateTimeFormatterBuilder
     builder.appendValue(ChronoField.YEAR, 1, 10, SignStyle.NORMAL).appendLiteral('-').appendValue(ChronoField.MONTH_OF_YEAR, 1, 2, SignStyle.NORMAL).appendLiteral('-').appendValue(ChronoField.DAY_OF_MONTH, 1, 2, SignStyle.NORMAL)
     builder.toFormatter.withResolverStyle(ResolverStyle.LENIENT)
@@ -140,13 +144,13 @@ trait Hive3Inspectors {
   }
 
   /**
-    * Wraps with Hive types based on object inspector.
-    */
+   * Wraps with Hive types based on object inspector.
+   */
   protected def wrapperFor(oi: ObjectInspector, dataType: DataType): Any => Any = oi match {
-      // TODO:
-//    case _ if dataType.isInstanceOf[UserDefinedType[_]] =>
-//      val sqlType = dataType.asInstanceOf[UserDefinedType[_]].sqlType
-//      wrapperFor(oi, sqlType)
+    // TODO:
+    //    case _ if dataType.isInstanceOf[UserDefinedType[_]] =>
+    //      val sqlType = dataType.asInstanceOf[UserDefinedType[_]].sqlType
+    //      wrapperFor(oi, sqlType)
     case x: ConstantObjectInspector =>
       (o: Any) =>
         x.getWritableConstantValue
@@ -315,24 +319,24 @@ trait Hive3Inspectors {
   }
 
   /**
-    * Builds unwrappers ahead of time according to object inspector
-    * types to avoid pattern matching and branching costs per row.
-    *
-    * Strictly follows the following order in unwrapping (constant OI has the higher priority):
-    * Constant Null object inspector =>
-    *   return null
-    * Constant object inspector =>
-    *   extract the value from constant object inspector
-    * If object inspector prefers writable =>
-    *   extract writable from `data` and then get the catalyst type from the writable
-    * Extract the java object directly from the object inspector
-    *
-    * NOTICE: the complex data type requires recursive unwrapping.
-    *
-    * @param objectInspector the ObjectInspector used to create an unwrapper.
-    * @return A function that unwraps data objects.
-    *         Use the overloaded HiveStructField version for in-place updating of a MutableRow.
-    */
+   * Builds unwrappers ahead of time according to object inspector
+   * types to avoid pattern matching and branching costs per row.
+   *
+   * Strictly follows the following order in unwrapping (constant OI has the higher priority):
+   * Constant Null object inspector =>
+   * return null
+   * Constant object inspector =>
+   * extract the value from constant object inspector
+   * If object inspector prefers writable =>
+   * extract writable from `data` and then get the catalyst type from the writable
+   * Extract the java object directly from the object inspector
+   *
+   * NOTICE: the complex data type requires recursive unwrapping.
+   *
+   * @param objectInspector the ObjectInspector used to create an unwrapper.
+   * @return A function that unwraps data objects.
+   *         Use the overloaded HiveStructField version for in-place updating of a MutableRow.
+   */
   def unwrapperFor(objectInspector: ObjectInspector): Any => Any =
     objectInspector match {
       case coi: ConstantObjectInspector if coi.getWritableConstantValue == null =>
@@ -590,13 +594,13 @@ trait Hive3Inspectors {
     }
 
   /**
-    * Builds unwrappers ahead of time according to object inspector
-    * types to avoid pattern matching and branching costs per row.
-    *
-    * @param field The HiveStructField to create an unwrapper for.
-    * @return A function that performs in-place updating of a MutableRow.
-    *         Use the overloaded ObjectInspector version for assignments.
-    */
+   * Builds unwrappers ahead of time according to object inspector
+   * types to avoid pattern matching and branching costs per row.
+   *
+   * @param field The HiveStructField to create an unwrapper for.
+   * @return A function that performs in-place updating of a MutableRow.
+   *         Use the overloaded ObjectInspector version for assignments.
+   */
   def unwrapperFor(field: HiveStructField): (Any, InternalRow, Int) => Unit =
     field.getFieldObjectInspector match {
       case oi: BooleanObjectInspector =>
@@ -651,10 +655,10 @@ trait Hive3Inspectors {
   }
 
   /**
-    * @param dataType Catalyst data type
-    * @return Hive java object inspector (recursively), not the Writable ObjectInspector
-    * We can easily map to the Hive built-in object inspector according to the data type.
-    */
+   * @param dataType Catalyst data type
+   * @return Hive java object inspector (recursively), not the Writable ObjectInspector
+   *         We can easily map to the Hive built-in object inspector according to the data type.
+   */
   def toInspector(dataType: DataType): ObjectInspector = dataType match {
     case ArrayType(tpe, _) =>
       ObjectInspectorFactory.getStandardListObjectInspector(toInspector(tpe))
@@ -677,17 +681,18 @@ trait Hive3Inspectors {
     case DecimalType() => PrimitiveObjectInspectorFactory.javaHiveDecimalObjectInspector
     case StructType(fields) =>
       ObjectInspectorFactory.getStandardStructObjectInspector(
-        java.util.Arrays.asList(fields.map(f => f.name) : _*),
-        java.util.Arrays.asList(fields.map(f => toInspector(f.dataType)) : _*))
+        java.util.Arrays.asList(fields.map(f => f.name): _*),
+        java.util.Arrays.asList(fields.map(f => toInspector(f.dataType)): _*))
   }
 
   /**
-    * Map the catalyst expression to ObjectInspector, however,
-    * if the expression is `Literal` or foldable, a constant writable object inspector returns;
-    * Otherwise, we always get the object inspector according to its data type(in catalyst)
-    * @param expr Catalyst expression to be mapped
-    * @return Hive java objectinspector (recursively).
-    */
+   * Map the catalyst expression to ObjectInspector, however,
+   * if the expression is `Literal` or foldable, a constant writable object inspector returns;
+   * Otherwise, we always get the object inspector according to its data type(in catalyst)
+   *
+   * @param expr Catalyst expression to be mapped
+   * @return Hive java objectinspector (recursively).
+   */
   def toInspector(expr: Expression): ObjectInspector = expr match {
     case Literal(value, StringType) =>
       getStringWritableConstantObjectInspector(value)
@@ -911,14 +916,13 @@ trait Hive3Inspectors {
     }
 
   implicit class typeInfoConversions(dt: DataType) {
-    import com.qubole.shaded.hadoop.hive.serde2.typeinfo._
-    import com.qubole.shaded.hadoop.hive.serde2.typeinfo.TypeInfoFactory._
+
 
     private def decimalTypeInfo(decimalType: DecimalType): TypeInfo = {
       // TODO
-//      decimalType match {
-        //      case DecimalType.Fixed(precision, scale) => new DecimalTypeInfo(precision, scale)
-//      }
+      //      decimalType match {
+      //      case DecimalType.Fixed(precision, scale) => new DecimalTypeInfo(precision, scale)
+      //      }
       new DecimalTypeInfo(decimalType.precision, decimalType.scale)
     }
 
@@ -927,8 +931,8 @@ trait Hive3Inspectors {
         getListTypeInfo(elemType.toTypeInfo)
       case StructType(fields) =>
         getStructTypeInfo(
-          java.util.Arrays.asList(fields.map(_.name) : _*),
-          java.util.Arrays.asList(fields.map(_.dataType.toTypeInfo) : _*))
+          java.util.Arrays.asList(fields.map(_.name): _*),
+          java.util.Arrays.asList(fields.map(_.dataType.toTypeInfo): _*))
       case MapType(keyType, valueType, _) =>
         getMapTypeInfo(keyType.toTypeInfo, valueType.toTypeInfo)
       case BinaryType => binaryTypeInfo

@@ -28,7 +28,7 @@ organization := "com.qubole"
 crossScalaVersions := Seq("2.13.8")
 
 scalaVersion := crossScalaVersions.value.head
-
+javacOptions ++= Seq("-source", "8", "-target", "8")
 resolvers += Resolver.jcenterRepo
 resolvers += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 resolvers += "Atlassian's Maven Public Repository" at "https://packages.atlassian.com/maven-public/"
@@ -47,19 +47,19 @@ spIgnoreProvided := true
 dependencyOverrides ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.13.0",
 
-
-  "org.apache.hive" % "hive-shims" % "3.1.0" % "test",
-  "org.apache.hive" % "hive-storage-api" % "2.8.1" % "test",
-  "org.apache.hive" % "hive-common" % "3.1.0" % "test",
-  "org.apache.hive" % "hive-serde" % "3.1.0" % "test",
-  "org.apache.hive" % "hive-exec" % "3.1.0" % "test",
-  "org.apache.hive" % "hive-metastore" % "3.1.0" % "test",
+//Тут не получается апнуть версию hive-exec до 4.0.0. В версии 3.1.3 есть jar hive-exec-core. В 4.0.0 - нет.
+  "org.apache.hive" % "hive-shims" % "4.0.0" % "test",
+  "org.apache.hive" % "hive-storage-api" % "4.0.0" % "test",
+  "org.apache.hive" % "hive-common" % "4.0.0" % "test",
+  "org.apache.hive" % "hive-serde" % "4.0.0" % "test",
+  "org.apache.hive" % "hive-exec" % "3.1.3" % "test",
+  "org.apache.hive" % "hive-metastore" % "4.0.0" % "test",
   //  "org.apache.hive" % "hive-metastore" % "2.3.9" % "test",
   //  "org.apache.hive" % "hive-exec" % "2.3.9" % "test",
   "org.apache.hadoop" % "hadoop-client-api" % "3.2.4" % "provided",
 
-  "org.apache.hive" % "hive-llap-client" % "3.1.0" % "test",
-  "org.apache.hive" % "hive-llap-common" % "3.1.0" % "test",
+  "org.apache.hive" % "hive-llap-client" % "4.0.0" % "test",
+  "org.apache.hive" % "hive-llap-common" % "4.0.0" % "test",
   "org.apache.calcite" % "calcite-core" % "1.37.0",
   "org.codehaus.janino" % "janino" % "3.0.16" % "test",
   "org.codehaus.janino" % "commons-compiler" % "3.0.16" % "test"
@@ -69,6 +69,9 @@ dependencyOverrides ++= Seq(
 /** **********************
  * Library Dependencies
  */
+// https://mvnrepository.com/artifact/org.apache.hive/hive-exec
+libraryDependencies += "org.apache.hive" % "hive-exec" % "4.0.0"
+
 libraryDependencies += "org.scala-lang" % "scala-library" % scalaVersion.value
 libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.6"
 
@@ -131,12 +134,12 @@ libraryDependencies ++= Seq(
   "org.codehaus.janino" % "janino" % "3.0.16" % "test",
   "org.codehaus.janino" % "commons-compiler" % "3.0.16" % "test",
 
-  "org.apache.hive" % "hive-shims" % "3.1.0" % "test",
-  "org.apache.hive" % "hive-storage-api" % "2.8.1" % "test",
-  "org.apache.hive" % "hive-common" % "3.1.0" % "test",
-  "org.apache.hive" % "hive-serde" % "3.1.0" % "test",
+  "org.apache.hive" % "hive-shims" % "4.0.0" % "test",
+  "org.apache.hive" % "hive-storage-api" % "4.0.0" % "test",
+  "org.apache.hive" % "hive-common" % "4.0.0" % "test",
+  "org.apache.hive" % "hive-serde" % "4.0.0" % "test",
 //  "org.apache.hive" % "hive-exec" % "3.1.0" % "test",
-  "org.apache.hive" % "hive-metastore" % "3.1.0" % "test",
+  "org.apache.hive" % "hive-metastore" % "4.0.0" % "test",
 
   // https://mvnrepository.com/artifact/com.dimafeng/testcontainers-scala
   "com.dimafeng" %% "testcontainers-scala" % "0.41.4" % Test,
