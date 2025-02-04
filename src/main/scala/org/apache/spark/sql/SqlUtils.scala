@@ -19,14 +19,12 @@
 
 package org.apache.spark.sql
 
-import org.apache.spark
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.analysis._
 import org.apache.spark.sql.catalyst.catalog.HiveTableRelation
-import org.apache.spark.sql.catalyst.encoders.RowEncoder
-import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, SubqueryAlias}
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.catalyst.expressions.{Attribute, AttributeReference, Expression}
+import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, SubqueryAlias}
 import org.apache.spark.sql.execution.LogicalRDD
 import org.apache.spark.sql.execution.datasources.LogicalRelation
 import org.apache.spark.sql.types.StructType
@@ -66,7 +64,7 @@ object SqlUtils {
             case _ => s"${attr.sql} resolution failed given these columns: " +
               planContaining.flatMap(_.output).map(_.name).mkString(",")
           }
-          attr.failAnalysis(failedMsg)
+          attr.failAnalysis(failedMsg,null)
         }
       }
     }
@@ -132,7 +130,8 @@ object SqlUtils {
                                      rdd: RDD[Row],
                                      schema: StructType,
                                      attributes: Seq[Attribute]): DataFrame = {
-    val encoder = RowEncoder(schema)
+
+    val encoder = Encoders.row(schema).asInstanceOf[ExpressionEncoder[Row]]
     val toInternalRow = encoder.createSerializer()
 
     val catalystRows = rdd.map(row => toInternalRow(row))

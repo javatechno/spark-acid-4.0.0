@@ -20,25 +20,18 @@
 package com.qubole.spark.hiveacid
 
 import com.qubole.spark.datasources.hiveacid.sql.catalyst.plans.command.{DeleteCommand, MergeCommand, UpdateCommand}
-
-import java.util.Locale
-import org.apache.spark.sql.{SparkSession, SparkSessionExtensions}
+import com.qubole.spark.hiveacid.datasource.{HiveAcidDataSource, HiveAcidRelation}
+import com.qubole.spark.hiveacid.merge._
+import org.apache.spark.sql.catalyst.analysis.EliminateSubqueryAliases
 import org.apache.spark.sql.catalyst.catalog.HiveTableRelation
-import org.apache.spark.sql.catalyst.plans.logical.{DeleteAction, DeleteFromTable, Filter, InsertAction, InsertIntoStatement, InsertStarAction, LogicalPlan, MergeIntoTable, SubqueryAlias, UpdateAction, UpdateStarAction, UpdateTable}
+import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.catalyst.rules.Rule
 import org.apache.spark.sql.execution.command.DDLUtils
 import org.apache.spark.sql.execution.datasources.LogicalRelation
-import com.qubole.spark.hiveacid.datasource.{HiveAcidDataSource, HiveAcidRelation}
-import com.qubole.spark.hiveacid.merge.{MergeCondition, MergeWhenClause, MergeWhenDelete, MergeWhenNotInsert, MergeWhenUpdateClause}
-import org.apache.spark.sql.catalyst.AliasIdentifier
-import org.apache.spark.sql.catalyst.analysis.{EliminateSubqueryAliases, UnresolvedRelation}
-import org.apache.spark.sql.catalyst.expressions.Expression
-import org.apache.spark.sql.connector.catalog.{Table, TableCatalog}
 import org.apache.spark.sql.functions.expr
-import org.apache.spark.sql.internal.SQLConf
+import org.apache.spark.sql.{SparkSession, SparkSessionExtensions}
 
-import scala.collection.immutable.Seq
-import scala.util.Try
+import java.util.Locale
 
 
 /**
@@ -64,7 +57,7 @@ case class HiveAcidAutoConvert(spark: SparkSession) extends Rule[LogicalPlan] {
   override def apply(plan: LogicalPlan): LogicalPlan = {
     val p = plan resolveOperators {
       // Write path
-      case InsertIntoStatement (r: HiveTableRelation, partition, userSpecifiedCols, query, overwrite, ifPartitionNotExists)
+      case InsertIntoStatement (r: HiveTableRelation, partition, userSpecifiedCols, query, overwrite, ifPartitionNotExists,byName)
         if query.resolved && DDLUtils.isHiveTable(r.tableMeta) && isConvertible(r) =>
         InsertIntoStatement (convert(r), partition, userSpecifiedCols, query, overwrite, ifPartitionNotExists)
       // Read path
@@ -79,7 +72,7 @@ case class HiveAcidAutoConvert(spark: SparkSession) extends Rule[LogicalPlan] {
         UpdateCommand(aliasedTable, setExpressions, condition)
       case u @ DeleteFromTable (EliminatedSubQuery(aliasedTable), condition) =>
         DeleteCommand(aliasedTable, condition)
-      case u @ MergeIntoTable (target, source, cond, matchedActions, notMatchedActions) =>
+      case u @ MergeIntoTable (target, source, cond, matchedActions, notMatchedActions, notMatchedBySourceActions) =>
 
       if (EliminatedSubQuery.unapply(target).isEmpty) {
         u

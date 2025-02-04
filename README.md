@@ -2,7 +2,8 @@
 
 Spark version: 3.3.2
 Scala version: 2.13
-
+NOTE:
+Hive 4.0.0 не может коннектиться к metastore. Тесты не пофикшены. Компиляция проходит.
 A Datasource on top of Spark Datasource V1 APIs, that provides Spark support for [Hive ACID transactions](https://cwiki.apache.org/confluence/display/Hive/Hive+Transactions).
 
 This datasource provides the capability to work with Hive ACID V2 tables, both Full ACID tables as well as Insert-Only tables.
