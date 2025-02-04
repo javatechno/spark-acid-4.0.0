@@ -61,6 +61,12 @@ case class HiveAcidAutoConvert(spark: SparkSession) extends Rule[LogicalPlan] {
     lr
   }
 
+  def getFullyQualifiedTableName(parameters: Map[String, String]): String = {
+    parameters.getOrElse("table", {
+      throw HiveAcidErrors.tableNotSpecifiedException()
+    })
+  }
+
   override def apply(plan: LogicalPlan): LogicalPlan = {
     val p = plan resolveOperators {
       // Write path

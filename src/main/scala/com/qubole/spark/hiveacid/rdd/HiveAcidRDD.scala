@@ -42,8 +42,6 @@ import java.text.SimpleDateFormat
 import java.util.concurrent.ConcurrentHashMap
 import java.util.{Date, Locale}
 import scala.collection.mutable.ListBuffer
-import org.apache.spark.util.SerializableConfiguration
-
 import scala.jdk.CollectionConverters._
 import scala.reflect.ClassTag
 
