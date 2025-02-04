@@ -122,9 +122,6 @@ trait BeforeAfterForSpark extends BeforeAndAfterAll with BeforeAndAfterEach with
         .set("spark.sql.hive.metastore.version", "4.0.0")
         .set("spark.sql.hive.metastore.jars", "maven")
 
-    .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-//    .set("spark.kryo.registrationRequired", "true")
-
     .set("spark.sql.parquet.writeLegacyFormat", "true")
     .set("spark.driver.host", "127.0.0.1")
     .set("spark.sql.caseSensitive", "false")

@@ -59,6 +59,8 @@ import org.apache.spark.sql.{SparkSession, functions}
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.SerializableConfiguration
 
+import org.apache.spark.util.SerializableConfiguration
+
 import java.util
 import java.util.Properties
 import scala.jdk.CollectionConverters._

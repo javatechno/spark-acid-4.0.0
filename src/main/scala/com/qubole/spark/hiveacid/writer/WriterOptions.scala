@@ -22,14 +22,14 @@ package com.qubole.spark.hiveacid.writer
 import com.qubole.spark.hiveacid.HiveAcidOperation
 import org.apache.spark.sql.catalyst.expressions.Attribute
 import org.apache.spark.sql.types.StructType
-import org.apache.spark.util
+import org.apache.spark.util.SerializableConfiguration
 
 /**
  * Writer options which will be serialized and sent to each executor
  */
 private[hiveacid] class WriterOptions(val currentWriteId: Long,
                                     val operationType: HiveAcidOperation.OperationType,
-                                    val serializableHadoopConf: org.apache.spark.util.SerializableConfiguration,
+                                    val serializableHadoopConf: SerializableConfiguration,
                                     val tableSchemaWithrowID: StructType,
                                     val dataColumns: Seq[Attribute],
                                     val partitionColumns: Seq[Attribute],

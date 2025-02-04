@@ -34,6 +34,7 @@ import org.apache.spark.sql.execution.command.AlterTableAddPartitionCommand
 import org.apache.spark.sql.execution.datasources.PartitioningUtils
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.util
+import org.apache.spark.util.SerializableConfiguration
 
 /**
  * Performs eager write of a dataframe df to a hive acid table based on operationType
@@ -118,7 +119,7 @@ private[hiveacid] class TableWriter(sparkSession: SparkSession,
 
       val writerOptions = new WriterOptions(curSnapshot.currentWriteId,
         operationType,
-        new util.SerializableConfiguration(hadoopConf),
+        new SerializableConfiguration(hadoopConf),
         getSchema(operationType),
         dataColumns,
         partitionColumns,

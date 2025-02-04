@@ -42,6 +42,8 @@ import java.text.SimpleDateFormat
 import java.util.concurrent.ConcurrentHashMap
 import java.util.{Date, Locale}
 import scala.collection.mutable.ListBuffer
+import org.apache.spark.util.SerializableConfiguration
+
 import scala.jdk.CollectionConverters._
 import scala.reflect.ClassTag
 
@@ -110,7 +112,7 @@ private[hiveacid] class HiveAcidRDD[K, V](sc: SparkContext,
       sc,
       validWriteIds,
       isFullAcidTable,
-      sc.broadcast(new util.SerializableConfiguration(conf))
+      sc.broadcast(new SerializableConfiguration(conf))
         .asInstanceOf[Broadcast[SerializableConfiguration]],
       initLocalJobConfFuncOpt = None,
       inputFormatClass,

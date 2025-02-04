@@ -64,7 +64,7 @@ object SqlUtils {
             case _ => s"${attr.sql} resolution failed given these columns: " +
               planContaining.flatMap(_.output).map(_.name).mkString(",")
           }
-          attr.failAnalysis(failedMsg,null)
+          attr.failAnalysis(failedMsg, Map.empty)
         }
       }
     }

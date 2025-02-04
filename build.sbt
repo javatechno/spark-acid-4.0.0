@@ -28,7 +28,7 @@ organization := "com.qubole"
 crossScalaVersions := Seq("2.13.8")
 
 scalaVersion := crossScalaVersions.value.head
-javacOptions ++= Seq("-source", "8", "-target", "8")
+
 resolvers += Resolver.jcenterRepo
 resolvers += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 resolvers += "Atlassian's Maven Public Repository" at "https://packages.atlassian.com/maven-public/"
@@ -45,7 +45,7 @@ spIgnoreProvided := true
 
 
 dependencyOverrides ++= Seq(
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.13.0",
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.0",
 
 //Тут не получается апнуть версию hive-exec до 4.0.0. В версии 3.1.3 есть jar hive-exec-core. В 4.0.0 - нет.
   "org.apache.hive" % "hive-shims" % "4.0.0" % "test",
@@ -56,7 +56,6 @@ dependencyOverrides ++= Seq(
   "org.apache.hive" % "hive-metastore" % "4.0.0" % "test",
   //  "org.apache.hive" % "hive-metastore" % "2.3.9" % "test",
   //  "org.apache.hive" % "hive-exec" % "2.3.9" % "test",
-  "org.apache.hadoop" % "hadoop-client-api" % "3.2.4" % "provided",
 
   "org.apache.hive" % "hive-llap-client" % "4.0.0" % "test",
   "org.apache.hive" % "hive-llap-common" % "4.0.0" % "test",
@@ -69,9 +68,6 @@ dependencyOverrides ++= Seq(
 /** **********************
  * Library Dependencies
  */
-// https://mvnrepository.com/artifact/org.apache.hive/hive-exec
-libraryDependencies += "org.apache.hive" % "hive-exec" % "4.0.0"
-
 libraryDependencies += "org.scala-lang" % "scala-library" % scalaVersion.value
 libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.6"
 
@@ -95,8 +91,6 @@ libraryDependencies ++= Seq(
     ExclusionRule("org.apache", "hadoop-common"),
     ExclusionRule("org.apache", "hadoop-hdfs")),
   "org.apache.hadoop" % "hadoop-common" % "3.2.4" % "provided",
-  "org.apache.hadoop" % "hadoop-client-api" % "3.2.4" % "provided",
-
   "org.apache.hadoop" % "hadoop-hdfs" % "3.2.4" % "provided",
   "org.apache.commons" % "commons-lang3" % "3.3.5" % "provided",
   // antlr-runtime
@@ -113,7 +107,7 @@ lazy val scalatest = "org.scalatest" %% "scalatest" % "3.2.17"
 // Dependencies for Test
 libraryDependencies ++= Seq(
   "org.apache.iceberg" % "iceberg-hive-runtime" % "1.5.0"% "test",
-  "org.apache.iceberg" % "iceberg-spark-runtime-3.3_2.13" % "1.5.0"% "test",
+  "org.apache.iceberg" % "iceberg-spark-runtime-3.4_2.13" % "1.5.0"% "test",
   "org.apache.iceberg" % "iceberg-core" % "1.5.0"% "test",
   "org.apache.iceberg" % "iceberg-hive-metastore" % "1.5.0"% "test",
   "org.apache.iceberg" % "iceberg-spark" % "1.5.0"% "test",
@@ -216,7 +210,7 @@ artifact in (Compile, assembly) := {
   art.withClassifier(Some("assembly"))
 }
 
-//addArtifact(artifact in (Compile, assembly), assembly)
+addArtifact(artifact in (Compile, assembly), assembly)
 
 val isNexus = sys.props.get("isNexus").getOrElse("false").toBoolean
 

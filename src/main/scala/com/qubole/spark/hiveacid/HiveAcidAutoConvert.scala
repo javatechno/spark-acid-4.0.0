@@ -26,7 +26,7 @@ import org.apache.spark.sql.catalyst.analysis.EliminateSubqueryAliases
 import org.apache.spark.sql.catalyst.catalog.HiveTableRelation
 import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.catalyst.rules.Rule
-import org.apache.spark.sql.execution.command.DDLUtils
+import org.apache.spark.sql.execution.command.{DDLUtils, ShowCreateTableAsSerdeCommand, ShowCreateTableCommand}
 import org.apache.spark.sql.execution.datasources.LogicalRelation
 import org.apache.spark.sql.functions.expr
 import org.apache.spark.sql.{SparkSession, SparkSessionExtensions}
@@ -37,6 +37,7 @@ import java.util.Locale
 /**
  * Analyzer rule to convert a transactional HiveRelation
  * into LogicalRelation backed by HiveAcidRelation
+ *
  * @param spark - spark session
  */
 case class HiveAcidAutoConvert(spark: SparkSession) extends Rule[LogicalPlan] {
@@ -50,8 +51,14 @@ case class HiveAcidAutoConvert(spark: SparkSession) extends Rule[LogicalPlan] {
     val options = relation.tableMeta.properties ++
       relation.tableMeta.storage.properties ++ Map("table" -> relation.tableMeta.qualifiedName)
 
+    val currentCatalog = spark.sessionState.catalogManager.currentCatalog.name()
+    val table = spark.sessionState.sqlParser
+      .parseTableIdentifier(getFullyQualifiedTableName(options).replaceAll(s"$currentCatalog\\.", ""))
+
+    val tb = spark.sessionState.catalog.getTableMetadata(table)
     val newRelation = new HiveAcidDataSource().createRelation(spark.sqlContext, options)
-    LogicalRelation(newRelation, isStreaming = false)
+    val lr = LogicalRelation(newRelation, tb)
+    lr
   }
 
   override def apply(plan: LogicalPlan): LogicalPlan = {
@@ -59,11 +66,17 @@ case class HiveAcidAutoConvert(spark: SparkSession) extends Rule[LogicalPlan] {
       // Write path
       case InsertIntoStatement (r: HiveTableRelation, partition, userSpecifiedCols, query, overwrite, ifPartitionNotExists,byName)
         if query.resolved && DDLUtils.isHiveTable(r.tableMeta) && isConvertible(r) =>
-        InsertIntoStatement (convert(r), partition, userSpecifiedCols, query, overwrite, ifPartitionNotExists)
+        InsertIntoStatement(convert(r), partition, userSpecifiedCols, query, overwrite, ifPartitionNotExists)
       // Read path
       case relation: HiveTableRelation
         if DDLUtils.isHiveTable(relation.tableMeta) && isConvertible(relation) =>
         convert(relation)
+
+      case relation: ShowCreateTableCommand =>
+        val tbl = spark.sessionState.catalog.getTableMetadata(relation.table)
+        if (DDLUtils.isHiveTable(tbl) && tbl.properties.getOrElse("transactional", "false").toBoolean)
+          ShowCreateTableAsSerdeCommand(relation.table, relation.output)
+        else relation
     }
     p
     p resolveOperatorsDown {
@@ -72,34 +85,34 @@ case class HiveAcidAutoConvert(spark: SparkSession) extends Rule[LogicalPlan] {
         UpdateCommand(aliasedTable, setExpressions, condition)
       case u @ DeleteFromTable (EliminatedSubQuery(aliasedTable), condition) =>
         DeleteCommand(aliasedTable, condition)
-      case u @ MergeIntoTable (target, source, cond, matchedActions, notMatchedActions, notMatchedBySourceActions) =>
+      case u @ MergeIntoTable (target, source, cond, matchedActions, notMatchedActions, _) =>
 
-      if (EliminatedSubQuery.unapply(target).isEmpty) {
-        u
-      } else {
-        val unaliasedTarget = EliminatedSubQuery.unapply(target).get
-        val unaliasedSource = EliminatedSubQuery.unapply(source).get
-        val targetAllias = extractAlias(target)
-        val sourceAllias = extractAlias(source)
+        if (EliminatedSubQuery.unapply(target).isEmpty) {
+          u
+        } else {
+          val unaliasedTarget = EliminatedSubQuery.unapply(target).get
+          val unaliasedSource = EliminatedSubQuery.unapply(source).get
+          val targetAllias = extractAlias(target)
+          val sourceAllias = extractAlias(source)
 
-        val matched: Seq[MergeWhenClause] = matchedActions.map {
-          case DeleteAction(condition) => MergeWhenDelete(condition)
-          case UpdateAction(condition, assignments) =>
-            val setExpressions = assignments.map(kv => kv.key.sql -> kv.value).toMap
-            MergeWhenUpdateClause(condition, setExpressions, false)
-          case UpdateStarAction(condition) =>
-            MergeWhenUpdateClause(condition, Map.empty, true)
+          val matched: Seq[MergeWhenClause] = matchedActions.map {
+            case DeleteAction(condition) => MergeWhenDelete(condition)
+            case UpdateAction(condition, assignments) =>
+              val setExpressions = assignments.map(kv => kv.key.sql -> kv.value).toMap
+              MergeWhenUpdateClause(condition, setExpressions, false)
+            case UpdateStarAction(condition) =>
+              MergeWhenUpdateClause(condition, Map.empty, true)
+          }
+
+          val notMatched = notMatchedActions.map {
+            case InsertAction(condition, assignments) =>
+              val setExpressions = assignments.map(_.key)
+              MergeWhenNotInsert(condition, setExpressions)
+            case InsertStarAction(condition) => MergeWhenNotInsert(condition, Seq(expr("*").expr))
+          }.headOption
+
+          MergeCommand(unaliasedTarget, unaliasedSource, matched, notMatched, MergeCondition(cond), sourceAllias, targetAllias)
         }
-
-        val notMatched = notMatchedActions.map {
-          case InsertAction(condition, assignments) =>
-            val setExpressions = assignments.map(_.key)
-            MergeWhenNotInsert(condition, setExpressions)
-          case InsertStarAction(condition) => MergeWhenNotInsert(condition, Seq(expr("*").expr))
-        }.headOption
-
-        MergeCommand(unaliasedTarget, unaliasedSource, matched, notMatched, MergeCondition(cond), sourceAllias, targetAllias)
-      }
     }
   }
 
@@ -126,13 +139,12 @@ object EliminatedSubQuery {
   }
 
 
-
 }
 
 class HiveAcidAutoConvertExtension extends (SparkSessionExtensions => Unit) {
   def apply(extension: SparkSessionExtensions): Unit = {
 
-    extension.injectResolutionRule{ spark => HiveAcidAutoConvert(spark) }
+    extension.injectResolutionRule { spark => HiveAcidAutoConvert(spark) }
 
   }
 }
