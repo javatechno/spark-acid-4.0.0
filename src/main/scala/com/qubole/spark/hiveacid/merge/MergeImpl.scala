@@ -26,6 +26,7 @@ import org.apache.spark.sql.catalyst.expressions.{Alias, Attribute, Expression, 
 import org.apache.spark.sql.{Column, DataFrame, SparkSession, SqlUtils, functions}
 import org.apache.spark.sql.catalyst.parser.plans.logical.MergePlan
 import org.apache.spark.internal.Logging
+import org.apache.spark.sql.catalyst.parser.CatalystSqlParser
 
 /**
   * Implements Algorithm to do Merge
@@ -86,10 +87,10 @@ class MergeImpl(val sparkSession: SparkSession,
       case Some(x: MergeWhenNotInsert) =>
         val targetOutputCols = targetDf.drop(HiveAcidMetadata.rowIdCol).queryExecution.analyzed.output
         val outputCols = targetOutputCols.zip(x.insertValues).map {
-          case (attr, value) => new Column(Alias(value , attr.name)())
+          case (attr, value) => new Column(value.toString).name(attr.name)
         }
-        val insertDf = joinedDf.filter(new Column(resolvedNonMatchedCond.get))
-          .filter(x.condition.map(new Column(_)).getOrElse(functions.lit(true)))
+        val insertDf = joinedDf.filter(new Column(resolvedNonMatchedCond.get.sql))
+          .filter(x.condition.map(cond => new Column(cond.sql)).getOrElse(functions.lit(true)))
           .select(outputCols :_*)
         Some(MergeDFOperation(insertDf, HiveAcidOperation.INSERT_INTO))
 
@@ -110,11 +111,11 @@ class MergeImpl(val sparkSession: SparkSession,
       case MergeWhenDelete(matchCondition)  =>
         val deleteDf = (matchCondition match {
           case Some(condition) => {
-            joinedDf.filter(new Column(resolvedMatchedCond.get)).
-              filter(new Column(condition))
+            joinedDf.filter(new Column(resolvedMatchedCond.get.sql)).
+              filter(new Column(condition.sql))
           }
-          case _ => joinedDf.filter(new Column(resolvedMatchedCond.get))
-        }).select(targetColumnsWithRowId.map(new Column(_)): _*)
+          case _ => joinedDf.filter(new Column(resolvedMatchedCond.get.sql))
+        }).select(targetColumnsWithRowId.map(row =>new Column(row.sql)): _*)
         MergeDFOperation(deleteDf, HiveAcidOperation.DELETE)
 
       case MergeWhenUpdateClause(matchCondition, setExpression: Map[String, Expression], _) =>
@@ -130,12 +131,12 @@ class MergeImpl(val sparkSession: SparkSession,
           }
         val outputColumns = updateExpressions.zip(targetColumnsWithRowId).map {
           case (newExpr, origAttr: Attribute) =>
-            new Column(Alias(newExpr, origAttr.name)())
+            new Column(newExpr.toString).name(origAttr.name)
         }
         val updateDf = (matchCondition match {
-          case Some(matchCondition) => joinedDf.filter(new Column(resolvedMatchedCond.get)).
-            filter(new Column(matchCondition))
-          case None => joinedDf.filter(new Column(resolvedMatchedCond.get))
+          case Some(matchCondition) => joinedDf.filter(new Column(resolvedMatchedCond.get.sql)).
+            filter(new Column(matchCondition.sql))
+          case None => joinedDf.filter(new Column(resolvedMatchedCond.get.sql))
         }).select(outputColumns: _*)
         MergeDFOperation(updateDf, HiveAcidOperation.UPDATE)
 
@@ -151,14 +152,14 @@ class MergeImpl(val sparkSession: SparkSession,
       runForJustInsertClause(resolvedMergePlan)
     } else {
       val baseDf = targetDf.join(sourceDf,
-        new Column(resolvedMergePlan.condition), "rightOuter")
+        new Column(resolvedMergePlan.condition.sql), "rightOuter")
       val joinedDf = SqlUtils.createDataFrameUsingAttributes(sparkSession, baseDf.rdd,
         baseDf.schema, baseDf.queryExecution.analyzed.output)
       val joinedPlan = joinedDf.queryExecution.analyzed
-      val matchedCond = functions.col(HiveAcidMetadata.rowIdCol).isNotNull.expr
+      val matchedCond = CatalystSqlParser.parseExpression(functions.col(HiveAcidMetadata.rowIdCol).isNotNull.toString())
       resolvedMatchedCond = Some(SqlUtils.resolveReferences(sparkSession,
         matchedCond, joinedPlan, failIfUnresolved = false))
-      val nonMatchedCond = functions.col(HiveAcidMetadata.rowIdCol).isNull.expr
+      val nonMatchedCond = CatalystSqlParser.parseExpression(functions.col(HiveAcidMetadata.rowIdCol).isNull.toString())
       resolvedNonMatchedCond = Some(SqlUtils.resolveReferences(sparkSession,
         nonMatchedCond, joinedPlan, failIfUnresolved = false))
       val targetPlan = targetDf.queryExecution.analyzed
@@ -166,7 +167,7 @@ class MergeImpl(val sparkSession: SparkSession,
 
       val targetPartColsWithRowId = (Seq(HiveAcidMetadata.rowIdCol) ++
         hiveAcidMetadata.partitionSchema.fieldNames).map( col =>
-        SqlUtils.resolveReferences(sparkSession, functions.col(col).expr,
+        SqlUtils.resolveReferences(sparkSession, CatalystSqlParser.parseExpression(functions.col(col).toString()),
           targetPlan, failIfUnresolved = true))
 
       // Get MergeOperations that needs to be executed in different statements
@@ -181,8 +182,8 @@ class MergeImpl(val sparkSession: SparkSession,
         logInfo("Cardinality Check for Merge being Performed to check one " +
           "row of target matches with utmost one source row. Note this check requires Join and can take time.")
         val targetRowsWithMultipleMatch = joinedDf
-          .filter(new Column(matchedCond))
-          .groupBy(targetPartColsWithRowId.map(new Column(_)) :_*)
+          .filter(new Column(matchedCond.sql))
+          .groupBy(targetPartColsWithRowId.map(col=>new Column(col.sql)) :_*)
           .count()
           .filter("count > 1")
           .count()
@@ -254,7 +255,7 @@ class MergeImpl(val sparkSession: SparkSession,
           getMatchedDf(joinedDf, resolvedMergePlan.matched.head, targetColumnsWithRowId)
         // For second clause exclude the rows matched by the first condition
         val matchedDf2 =
-          getMatchedDf(joinedDf.filter(new Column(Not(firstMatchCondition))),
+          getMatchedDf(joinedDf.filter(new Column(Not(firstMatchCondition).sql)),
             resolvedMergePlan.matched(1), targetColumnsWithRowId)
         Seq(matchedDf1, matchedDf2)
       }
@@ -277,16 +278,16 @@ class MergeImpl(val sparkSession: SparkSession,
         " columns, whereas insert specifies " + notMatched.insertValues.length + " values.")
     }
     val outputCols = targetOutputColNames.zip(notMatched.insertValues).map {
-      case (col, value) => new Column(Alias(value , col)())
+      case (col, value) => new Column(Alias(value , col)().sql)
     }
 
-    val resolvedCondition = notMatched.condition.getOrElse(functions.lit(true).expr)
+    val resolvedCondition = notMatched.condition.getOrElse(CatalystSqlParser.parseExpression(functions.lit(true).toString()))
     logInfo(s"MERGE Clause ${1}: INSERT being executed")
     logInfo(s"Note, only MERGE operation specified is INSERT hence, LeftAntiJoin " +
       s"between source and target will be performed")
     // As only notMatched Clauses are present, we can do left-anti join to find the rows to be inserted
-    val insertDf = sourceDf.join(targetDf, new Column(mergePlan.condition), "leftanti")
-      .filter(new Column(resolvedCondition)).select(outputCols :_*)
+    val insertDf = sourceDf.join(targetDf, new Column(mergePlan.condition.sql), "leftanti")
+      .filter(new Column(resolvedCondition.sql)).select(outputCols :_*)
     operationDelegate.insertInto(insertDf, txn)
   }
   private case class MergeDFOperation(dataFrame: DataFrame, operationType: HiveAcidOperation.OperationType)

@@ -59,7 +59,7 @@ object HiveAcidUtils {
       }
       if (nonPartitionPruningPredicates.nonEmpty) {
         throw new AnalysisException("Expected only partition pruning predicates: " +
-          nonPartitionPruningPredicates)
+          nonPartitionPruningPredicates,null)
       }
 
       val boundPredicate =

@@ -49,6 +49,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.analysis.CastSupport
 import org.apache.spark.sql.catalyst.catalog.CatalogTablePartition
 import org.apache.spark.sql.catalyst.expressions._
+import org.apache.spark.sql.catalyst.parser.CatalystSqlParser
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
 import org.apache.spark.sql.catalyst.{InternalRow, SQLConfHelper}
 import org.apache.spark.sql.hive.{Hive3Inspectors, HiveAcidUtils}
@@ -469,7 +470,7 @@ private[reader] object HiveAcidReader extends Hive3Inspectors with Logging {
                               partitionPruningFiltering: Option[String]): Seq[HiveJarPartition] = {
     partitionPruningFiltering match {
       case Some(filter) => {
-        val filterExp = functions.expr(filter).expr
+        val filterExp = CatalystSqlParser.parseExpression(functions.expr(filter).toString())
         val partitionMap: Map[CatalogTablePartition, HiveJarPartition] =
           partitions.map(hp => (HiveAcidUtils.convertToCatalogTablePartition(hp), hp)).toMap
         val catalogParts = HiveAcidUtils.prunePartitionsByFilter(hiveAcidMetadata,

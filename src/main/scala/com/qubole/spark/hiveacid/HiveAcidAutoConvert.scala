@@ -24,6 +24,7 @@ import com.qubole.spark.hiveacid.datasource.{HiveAcidDataSource, HiveAcidRelatio
 import com.qubole.spark.hiveacid.merge._
 import org.apache.spark.sql.catalyst.analysis.EliminateSubqueryAliases
 import org.apache.spark.sql.catalyst.catalog.HiveTableRelation
+import org.apache.spark.sql.catalyst.parser.CatalystSqlParser
 import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.catalyst.rules.Rule
 import org.apache.spark.sql.execution.command.{DDLUtils, ShowCreateTableAsSerdeCommand, ShowCreateTableCommand}
@@ -91,7 +92,7 @@ case class HiveAcidAutoConvert(spark: SparkSession) extends Rule[LogicalPlan] {
         UpdateCommand(aliasedTable, setExpressions, condition)
       case u @ DeleteFromTable (EliminatedSubQuery(aliasedTable), condition) =>
         DeleteCommand(aliasedTable, condition)
-      case u @ MergeIntoTable (target, source, cond, matchedActions, notMatchedActions, _) =>
+      case u @ MergeIntoTable (target, source, cond, matchedActions, notMatchedActions, _, false) =>
 
         if (EliminatedSubQuery.unapply(target).isEmpty) {
           u
@@ -114,7 +115,7 @@ case class HiveAcidAutoConvert(spark: SparkSession) extends Rule[LogicalPlan] {
             case InsertAction(condition, assignments) =>
               val setExpressions = assignments.map(_.key)
               MergeWhenNotInsert(condition, setExpressions)
-            case InsertStarAction(condition) => MergeWhenNotInsert(condition, Seq(expr("*").expr))
+            case InsertStarAction(condition) => MergeWhenNotInsert(condition, (Seq(CatalystSqlParser.parseExpression(expr("*").toString()))))
           }.headOption
 
           MergeCommand(unaliasedTarget, unaliasedSource, matched, notMatched, MergeCondition(cond), sourceAllias, targetAllias)

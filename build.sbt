@@ -37,7 +37,7 @@ resolvers += "Maven Central Server" at "https://repo1.maven.org/maven2/"
 /** ************************
  * Spark package settings
  */
-sparkVersion := sys.props.getOrElse("spark.version", "3.5.3")
+sparkVersion := sys.props.getOrElse("spark.version", "4.0.0-preview2")
 
 spIncludeMaven := true
 

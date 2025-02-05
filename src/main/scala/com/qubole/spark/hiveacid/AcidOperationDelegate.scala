@@ -17,23 +17,22 @@
 
 package com.qubole.spark.hiveacid
 
-import com.qubole.spark.hiveacid.datasource.{HiveAcidDataSource, HiveAcidRelation}
+import com.qubole.spark.hiveacid.datasource.HiveAcidDataSource
 import com.qubole.spark.hiveacid.hive.HiveAcidMetadata
 import com.qubole.spark.hiveacid.merge.{MergeImpl, MergeWhenClause, MergeWhenNotInsert}
-import com.qubole.spark.hiveacid.rdd.EmptyRDD
 import com.qubole.spark.hiveacid.reader.TableReader
 import com.qubole.spark.hiveacid.transaction._
 import com.qubole.spark.hiveacid.writer.TableWriter
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.catalyst.{AliasIdentifier, InternalRow}
-import org.apache.spark.sql.catalyst.expressions.{Alias, Expression}
+import org.apache.spark.sql._
+import org.apache.spark.sql.catalyst.AliasIdentifier
+import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.catalyst.parser.CatalystSqlParser
 import org.apache.spark.sql.catalyst.parser.plans.logical.MergePlan
 import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, SubqueryAlias}
-import org.apache.spark.sql.execution.datasources.LogicalRelation
 import org.apache.spark.sql.functions.expr
 import org.apache.spark.sql.sources.Filter
-import org.apache.spark.sql.{Column, DataFrame, SparkSession, SqlUtils, _}
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
@@ -214,10 +213,10 @@ class HiveAcidOperationDelegate(val sparkSession: SparkSession,
     val (qualifiedPlan: LogicalPlan, resolvedDf: DataFrame) =
       SqlUtils.getDFQualified(sparkSession, readDF(true), hiveAcidMetadata.fullyQualifiedName)
 
-    def toStrColumnMap(map: Map[String, Column]): Map[String, Column] = {
+    def toStrColumnMap(map: Map[String, Column]): Map[String, Expression] = {
       map.toSeq.map { case (k, v) =>
-        k.toLowerCase -> functions.expr(SqlUtils.resolveReferences(sparkSession, v.expr,
-          qualifiedPlan, failIfUnresolved = false).sql)}.toMap
+        k.toLowerCase -> CatalystSqlParser.parseExpression(functions.expr(SqlUtils.resolveReferences(sparkSession, CatalystSqlParser.parseExpression(v.toString()),
+          qualifiedPlan, failIfUnresolved = false).sql).toString())}.toMap
     }
     val strColumnMap = toStrColumnMap(newValues)
     val updateColumns = strColumnMap.keys
@@ -235,21 +234,21 @@ class HiveAcidOperationDelegate(val sparkSession: SparkSession,
         attr =>
           val updateColOpt = updateColumns.find(uc => resolver(uc, attr.name))
            updateColOpt match {
-             case Some(updateCol) => strColumnMap(updateCol).expr
-             case None => attr
+             case Some(updateCol) => strColumnMap(updateCol)
+//             case None => attr
           }
       }
 
     val outputColumns = updateExpressions.zip(df.queryExecution.optimizedPlan.output).map {
       case (newExpr, origAttr) =>
-        new Column(Alias(newExpr, origAttr.name)())
+        new Column(newExpr.toString).name(origAttr.name)
     }
 
     val currentCatalog = sparkSession.sessionState.catalogManager.currentCatalog.name()
 
     condition match {
       case Some(cond) =>
-        val condNoCatalog = expr(cond.expr.sql.replaceAll(s"$currentCatalog\\.${hiveAcidMetadata.fullyQualifiedName}\\.", "")).expr
+        val condNoCatalog = CatalystSqlParser.parseExpression(expr(CatalystSqlParser.parseExpression(cond.toString()).sql.replaceAll(s"$currentCatalog\\.${hiveAcidMetadata.fullyQualifiedName}\\.", "")).toString())
         val resolvedExpr = SqlUtils.resolveReferences(sparkSession,
           condNoCatalog,
           qualifiedPlan, failIfUnresolved = false)
@@ -331,7 +330,7 @@ class HiveAcidOperationDelegate(val sparkSession: SparkSession,
 
     val currentCatalog = sparkSession.sessionState.catalogManager.currentCatalog.name()
 
-    val condNoCatalog = expr(condition.expr.sql.replaceAll(s"$currentCatalog\\.${hiveAcidMetadata.fullyQualifiedName}\\.", "")).expr
+    val condNoCatalog = CatalystSqlParser.parseExpression(expr(CatalystSqlParser.parseExpression(condition.toString()).sql.replaceAll(s"$currentCatalog\\.${hiveAcidMetadata.fullyQualifiedName}\\.", "")).toString())
 
     val resolvedExpr = SqlUtils.resolveReferences(sparkSession,
       condNoCatalog,

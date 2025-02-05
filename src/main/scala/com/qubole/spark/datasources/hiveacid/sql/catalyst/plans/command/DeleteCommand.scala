@@ -24,7 +24,7 @@ case class DeleteCommand(
     }
     children(0) match {
       case LogicalRelation(relation: HiveAcidRelation, _, _ , _) => {
-        relation.delete(new Column(condition))
+        relation.delete(new Column(condition.sql))
       }
       case _ => throw HiveAcidErrors.tableNotAcidException(table.toString())
     }

@@ -168,8 +168,4 @@ object HiveAcidMetadata {
       field.name.toLowerCase(Locale.ROOT)
     }
   }
-
-  def getColNames(sparkSession: SparkSession, schema: StructType): Seq[String] = {
-    schema.map(getColName(sparkSession, _))
-  }
 }

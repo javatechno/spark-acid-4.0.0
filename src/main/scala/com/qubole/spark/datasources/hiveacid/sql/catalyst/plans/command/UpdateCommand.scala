@@ -25,8 +25,8 @@ case class UpdateCommand(
     }
     children(0) match {
       case LogicalRelation(relation: HiveAcidRelation, _, _ , _) => {
-        val setColumns = setExpressions.mapValues(expr => new Column(expr)).toMap
-        val updateFilterColumn = condition.map(new Column(_))
+        val setColumns = setExpressions.mapValues(expr => new Column(expr.sql)).toMap
+        val updateFilterColumn = condition.map(cond =>new Column(cond.sql))
         relation.update(updateFilterColumn, setColumns)
       }
       case LogicalRelation(_, _, Some(catalogTable), _) =>

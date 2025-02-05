@@ -143,7 +143,7 @@ object SqlUtils {
   }
 
   def analysisException(cause: String): Throwable = {
-    new AnalysisException(cause)
+    new AnalysisException(cause, null)
   }
 
   def removeTopSubqueryAlias(logicalPlan: LogicalPlan): LogicalPlan = {
