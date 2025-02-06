@@ -48,17 +48,17 @@ dependencyOverrides ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.0",
 
 //Тут не получается апнуть версию hive-exec до 4.0.0. В версии 3.1.3 есть jar hive-exec-core. В 4.0.0 - нет.
-  "org.apache.hive" % "hive-shims" % "4.0.0" % "test",
-  "org.apache.hive" % "hive-storage-api" % "4.0.0" % "test",
-  "org.apache.hive" % "hive-common" % "4.0.0" % "test",
-  "org.apache.hive" % "hive-serde" % "4.0.0" % "test",
-  "org.apache.hive" % "hive-exec" % "3.1.3" % "test",
-  "org.apache.hive" % "hive-metastore" % "4.0.0" % "test",
+  "org.apache.hive" % "hive-shims" % "4.0.1" % "test",
+  "org.apache.hive" % "hive-storage-api" % "4.0.1" % "test",
+  "org.apache.hive" % "hive-common" % "4.0.1" % "test",
+  "org.apache.hive" % "hive-serde" % "4.0.1" % "test",
+  "org.apache.hive" % "hive-exec" % "4.0.1" % "test",
+  "org.apache.hive" % "hive-metastore" % "4.0.1" % "test",
   //  "org.apache.hive" % "hive-metastore" % "2.3.9" % "test",
   //  "org.apache.hive" % "hive-exec" % "2.3.9" % "test",
 
-  "org.apache.hive" % "hive-llap-client" % "4.0.0" % "test",
-  "org.apache.hive" % "hive-llap-common" % "4.0.0" % "test",
+  "org.apache.hive" % "hive-llap-client" % "4.0.1" % "test",
+  "org.apache.hive" % "hive-llap-common" % "4.0.1" % "test",
   "org.apache.calcite" % "calcite-core" % "1.37.0",
   "org.codehaus.janino" % "janino" % "3.0.16" % "test",
   "org.codehaus.janino" % "commons-compiler" % "3.0.16" % "test"
@@ -128,12 +128,12 @@ libraryDependencies ++= Seq(
   "org.codehaus.janino" % "janino" % "3.0.16" % "test",
   "org.codehaus.janino" % "commons-compiler" % "3.0.16" % "test",
 
-  "org.apache.hive" % "hive-shims" % "4.0.0" % "test",
-  "org.apache.hive" % "hive-storage-api" % "4.0.0" % "test",
-  "org.apache.hive" % "hive-common" % "4.0.0" % "test",
-  "org.apache.hive" % "hive-serde" % "4.0.0" % "test",
+  "org.apache.hive" % "hive-shims" % "4.0.1" % "test",
+  "org.apache.hive" % "hive-storage-api" % "4.0.1" % "test",
+  "org.apache.hive" % "hive-common" % "4.0.1" % "test",
+  "org.apache.hive" % "hive-serde" % "4.0.1" % "test",
 //  "org.apache.hive" % "hive-exec" % "3.1.0" % "test",
-  "org.apache.hive" % "hive-metastore" % "4.0.0" % "test",
+  "org.apache.hive" % "hive-metastore" % "4.0.1" % "test",
 
   // https://mvnrepository.com/artifact/com.dimafeng/testcontainers-scala
   "com.dimafeng" %% "testcontainers-scala" % "0.41.4" % Test,

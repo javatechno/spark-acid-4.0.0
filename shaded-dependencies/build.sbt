@@ -27,7 +27,7 @@ publishArtifact in (Compile, packageSrc) := false
 
 publishArtifact in (Compile, packageBin) := false
 
-val hive_version = sys.props.getOrElse("hive.version", "4.0.0")
+val hive_version = sys.props.getOrElse("hive.version", "4.0.1")
 
 val orc_version = sys.props.getOrElse("orc.version", "1.5.6")
 
