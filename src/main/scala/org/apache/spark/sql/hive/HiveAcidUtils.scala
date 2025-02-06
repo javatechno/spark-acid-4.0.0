@@ -31,7 +31,6 @@ import org.apache.spark.sql.catalyst.trees.TreeNode
 
 import scala.collection.Seq
 import scala.util.control.NonFatal
-
 object HiveAcidUtils {
 
   /**

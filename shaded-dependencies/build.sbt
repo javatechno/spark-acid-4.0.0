@@ -27,7 +27,7 @@ publishArtifact in (Compile, packageSrc) := false
 
 publishArtifact in (Compile, packageBin) := false
 
-val hive_version = sys.props.getOrElse("hive.version", "4.0.0")
+val hive_version = sys.props.getOrElse("hive.version", "4.0.1")
 
 val orc_version = sys.props.getOrElse("orc.version", "1.5.6")
 
@@ -37,7 +37,7 @@ resolvers += "Additional Maven Repository" at sys.props.getOrElse("hive.repo", "
 libraryDependencies ++= Seq(
 	// Hive/Orc core dependencies packed.
 	"org.apache.hive" % "hive-metastore" % hive_version intransitive(),
-	"org.apache.hive" % "hive-exec" % "4.0.0" intransitive(),
+	"org.apache.hive" % "hive-exec" % hive_version intransitive(),
 	"org.apache.orc" % "orc-core" % orc_version intransitive(),
 	"org.apache.orc" % "orc-mapreduce" % orc_version intransitive(),
 

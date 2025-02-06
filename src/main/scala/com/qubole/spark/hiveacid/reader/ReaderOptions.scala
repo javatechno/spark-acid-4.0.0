@@ -19,7 +19,9 @@
 
 package com.qubole.spark.hiveacid.reader
 
+
 import com.qubole.spark.hiveacid.SparkAcidConf
+
 import org.apache.hadoop.conf.Configuration
 
 import org.apache.spark.sql.catalyst.expressions.Attribute

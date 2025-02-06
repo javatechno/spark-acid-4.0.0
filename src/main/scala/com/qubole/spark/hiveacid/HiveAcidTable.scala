@@ -33,6 +33,7 @@ import org.apache.spark.sql.catalyst.AliasIdentifier
 import org.apache.spark.sql.catalyst.expressions.Expression
 
 
+
 /**
   * Represents a hive acid table and exposes API to perform operations on top of it
   * @param sparkSession - spark session object

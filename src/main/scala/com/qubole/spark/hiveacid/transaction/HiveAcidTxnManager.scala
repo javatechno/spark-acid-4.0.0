@@ -17,22 +17,24 @@
 
 package com.qubole.spark.hiveacid.transaction
 
-import com.qubole.shaded.thrift.TException
+import java.util.concurrent.{Executors, ScheduledExecutorService, ThreadFactory, TimeUnit}
+import java.util.concurrent.atomic.AtomicBoolean
+import com.qubole.shaded.hadoop.hive.common.{ValidTxnList, ValidTxnWriteIdList, ValidWriteIdList}
+import com.qubole.shaded.hadoop.hive.metastore.api.{DataOperationType, LockRequest, LockResponse, LockState, TxnInfo}
+import com.qubole.shaded.hadoop.hive.metastore.conf.MetastoreConf
+import com.qubole.shaded.hadoop.hive.metastore.txn.TxnUtils
+import com.qubole.shaded.hadoop.hive.metastore.{IMetaStoreClient, LockComponentBuilder, LockRequestBuilder, RetryingMetaStoreClient}
 import com.qubole.spark.hiveacid.datasource.HiveAcidDataSource
 import com.qubole.spark.hiveacid.hive.HiveConverter
 import com.qubole.spark.hiveacid.{HiveAcidErrors, HiveAcidOperation, SparkAcidConf}
-import org.apache.hadoop.hive.common.{ValidTxnList, ValidTxnWriteIdList, ValidWriteIdList}
-import org.apache.hadoop.hive.metastore.api._
-import org.apache.hadoop.hive.metastore.conf.MetastoreConf
-import org.apache.hadoop.hive.metastore.txn.TxnCommonUtils
-import org.apache.hadoop.hive.metastore.{IMetaStoreClient, LockComponentBuilder, LockRequestBuilder, RetryingMetaStoreClient}
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql.{SparkSession, SqlUtils}
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.SqlUtils
+import com.qubole.shaded.thrift.TException
 
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.{Executors, ScheduledExecutorService, ThreadFactory, TimeUnit}
 import scala.collection.JavaConverters._
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
+import scala.jdk.CollectionConverters.IterableHasAsJava
 import scala.language.implicitConversions
 
 /**

@@ -27,6 +27,7 @@ import org.apache.spark.sql.{Column, DataFrame, SparkSession, SqlUtils, function
 import org.apache.spark.sql.catalyst.parser.plans.logical.MergePlan
 import org.apache.spark.internal.Logging
 
+
 /**
   * Implements Algorithm to do Merge
   * It does target right outer join source on the merge condition specified.

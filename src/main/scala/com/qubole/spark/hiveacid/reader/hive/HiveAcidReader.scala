@@ -19,48 +19,51 @@
 
 package com.qubole.spark.hiveacid.reader.hive
 
+import java.util
+import java.util.Properties
 import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.io.Output
+import com.qubole.shaded.hadoop.hive.conf.HiveConf.ConfVars
+import com.qubole.shaded.hadoop.hive.common.ValidWriteIdList
+import com.qubole.shaded.hadoop.hive.metastore.api.FieldSchema
+import com.qubole.shaded.hadoop.hive.metastore.api.hive_metastoreConstants._
+import com.qubole.shaded.hadoop.hive.metastore.utils.MetaStoreUtils.{getColumnNamesFromFieldSchema, getColumnTypesFromFieldSchema}
+import com.qubole.shaded.hadoop.hive.ql.exec.Utilities
+import com.qubole.shaded.hadoop.hive.ql.io.{AcidUtils, RecordIdentifier}
+import com.qubole.shaded.hadoop.hive.ql.metadata.{Partition => HiveJarPartition, Table => HiveTable}
+import com.qubole.shaded.hadoop.hive.ql.plan.TableDesc
+import com.qubole.shaded.hadoop.hive.serde2.Deserializer
+import com.qubole.shaded.hadoop.hive.serde2.objectinspector.{ObjectInspectorConverters, StructObjectInspector}
+import com.qubole.shaded.hadoop.hive.serde2.objectinspector.primitive._
 import com.qubole.spark.hiveacid.HiveAcidErrors
-import com.qubole.spark.hiveacid.hive.{HiveAcidMetadata, HiveConverter}
-import com.qubole.spark.hiveacid.rdd._
+import com.qubole.spark.hiveacid.hive.HiveAcidMetadata
+import com.qubole.spark.hiveacid.hive.HiveConverter
 import com.qubole.spark.hiveacid.reader.{Reader, ReaderOptions, ReaderPartition}
+import com.qubole.spark.hiveacid.rdd._
 import com.qubole.spark.hiveacid.util._
 import org.apache.commons.codec.binary.Base64
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{Path, PathFilter}
-import org.apache.hadoop.hive.common.ValidWriteIdList
-import org.apache.hadoop.hive.conf.HiveConf.ConfVars
-import org.apache.hadoop.hive.metastore.api.FieldSchema
-import org.apache.hadoop.hive.metastore.api.hive_metastoreConstants._
-import org.apache.hadoop.hive.metastore.utils.MetaStoreUtils.{getColumnNamesFromFieldSchema, getColumnTypesFromFieldSchema}
-import org.apache.hadoop.hive.ql.exec.Utilities
-import org.apache.hadoop.hive.ql.io.{AcidUtils, RecordIdentifier}
-import org.apache.hadoop.hive.ql.metadata.{Partition => HiveJarPartition, Table => HiveTable}
-import org.apache.hadoop.hive.ql.plan.TableDesc
-import org.apache.hadoop.hive.serde2.objectinspector.primitive._
-import org.apache.hadoop.hive.serde2.objectinspector.{ObjectInspectorConverters, StructObjectInspector}
-import org.apache.hadoop.hive.serde2.{AbstractSerDe, Deserializer}
 import org.apache.hadoop.io.Writable
 import org.apache.hadoop.mapred.{FileInputFormat, InputFormat, JobConf}
 import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.{SparkSession, functions}
+import org.apache.spark.sql.catalyst.{InternalRow, SQLConfHelper}
 import org.apache.spark.sql.catalyst.analysis.CastSupport
 import org.apache.spark.sql.catalyst.catalog.CatalogTablePartition
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
-import org.apache.spark.sql.catalyst.{InternalRow, SQLConfHelper}
-import org.apache.spark.sql.hive.{Hive3Inspectors, HiveAcidUtils}
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.sources.Filter
+import org.apache.spark.sql.types.{DataType, StructType}
+import org.apache.spark.sql.hive.{Hive3Inspectors, HiveAcidUtils}
 import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.{SparkSession, functions}
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.SerializableConfiguration
 
-import java.util
-import java.util.Properties
 import scala.jdk.CollectionConverters._
 
 /**

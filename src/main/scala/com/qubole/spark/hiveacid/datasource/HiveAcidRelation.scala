@@ -19,17 +19,17 @@
 
 package com.qubole.spark.hiveacid.datasource
 
-import org.apache.spark.internal.Logging
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Column, DataFrame, Row, SQLContext, SparkSession}
-import org.apache.spark.sql.sources.{BaseRelation, Filter, InsertableRelation, PrunedFilteredScan}
-import org.apache.spark.sql.types._
-import com.qubole.spark.hiveacid.{HiveAcidErrors, HiveAcidTable, SparkAcidConf}
 import com.qubole.spark.hiveacid.hive.HiveAcidMetadata
 import com.qubole.spark.hiveacid.merge.{MergeWhenClause, MergeWhenNotInsert}
+import com.qubole.spark.hiveacid.{HiveAcidTable, SparkAcidConf}
+import org.apache.spark.internal.Logging
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql._
 import org.apache.spark.sql.catalyst.AliasIdentifier
 import org.apache.spark.sql.catalyst.expressions.Expression
-import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
+import org.apache.spark.sql.sources.{BaseRelation, Filter, InsertableRelation, PrunedFilteredScan}
+import org.apache.spark.sql.types._
+
 import scala.jdk.CollectionConverters._
 
 

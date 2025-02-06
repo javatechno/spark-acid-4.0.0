@@ -19,21 +19,17 @@
 
 package org.apache.spark.sql.hive
 
-import org.apache.hadoop.hive.common.`type`.{Date, HiveChar, HiveVarchar, Timestamp}
-import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory.{binaryTypeInfo, booleanTypeInfo, byteTypeInfo, dateTypeInfo, doubleTypeInfo, floatTypeInfo, getListTypeInfo, getMapTypeInfo, getStructTypeInfo, intTypeInfo, longTypeInfo, shortTypeInfo, stringTypeInfo, timestampTypeInfo, voidTypeInfo}
-import org.apache.hadoop.hive.serde2.typeinfo.{DecimalTypeInfo, TypeInfo}
-
 import java.lang.reflect.{ParameterizedType, Type, WildcardType}
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder, ResolverStyle, SignStyle}
 import java.time.temporal.ChronoField
+
 import scala.collection.JavaConverters._
-//import com.qubole.shaded.hadoop.hive.serde2.{io => hiveIo}
+import com.qubole.shaded.hadoop.hive.common.`type`.{Date, HiveChar, HiveDecimal, HiveVarchar, Timestamp, TimestampUtils}
+import com.qubole.shaded.hadoop.hive.serde2.{io => hiveIo}
+import com.qubole.shaded.hadoop.hive.serde2.objectinspector.{StructField => HiveStructField, _}
+import com.qubole.shaded.hadoop.hive.serde2.objectinspector.primitive._
+import com.qubole.shaded.hadoop.hive.serde2.typeinfo.{DecimalTypeInfo, TypeInfoFactory}
 import com.qubole.spark.hiveacid.AnalysisException
-import org.apache.hadoop.hive.common.`type`.HiveDecimal
-import org.apache.hadoop.hive.serde2.objectinspector.primitive._
-import org.apache.hadoop.hive.serde2.objectinspector.{StructField => HiveStructField, _}
-import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory
-import org.apache.hadoop.hive.serde2.{io => hiveIo}
 import org.apache.hadoop.{io => hadoopIo}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
@@ -41,7 +37,6 @@ import org.apache.spark.sql.catalyst.util._
 import org.apache.spark.sql.types
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
-
 /**
  * This class is similar to org.apache.spark.sql.hive.HiveInspectors.
  * Changes are made here to make it work with Hive3

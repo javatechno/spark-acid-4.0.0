@@ -19,18 +19,23 @@
 
 package com.qubole.spark.hiveacid.writer.hive
 
+import java.util.Properties
+import scala.collection.JavaConverters._
+import scala.collection.{mutable}
+import scala.collection.immutable.Seq
+import com.qubole.shaded.hadoop.hive.ql.exec.FileSinkOperator.RecordWriter
+import com.qubole.shaded.hadoop.hive.ql.exec.Utilities
+import com.qubole.shaded.hadoop.hive.ql.io.{BucketCodec, HiveFileFormatUtils, RecordIdentifier, RecordUpdater, _}
+import com.qubole.shaded.hadoop.hive.ql.plan.{FileSinkDesc, TableDesc}
+import com.qubole.shaded.hadoop.hive.serde2.{Deserializer, SerDeUtils}
+import com.qubole.shaded.hadoop.hive.serde2.Serializer
+import com.qubole.shaded.hadoop.hive.serde2.objectinspector.{ObjectInspector, ObjectInspectorFactory, ObjectInspectorUtils, StructObjectInspector}
+import com.qubole.shaded.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils.ObjectInspectorCopyOption
 import com.qubole.spark.hiveacid.hive.HiveAcidMetadata
+import com.qubole.spark.hiveacid.{HiveAcidErrors, HiveAcidOperation}
 import com.qubole.spark.hiveacid.util.Util
 import com.qubole.spark.hiveacid.writer.{Writer, WriterOptions}
-import com.qubole.spark.hiveacid.{HiveAcidErrors, HiveAcidOperation}
 import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.hadoop.hive.ql.exec.FileSinkOperator.RecordWriter
-import org.apache.hadoop.hive.ql.exec.Utilities
-import org.apache.hadoop.hive.ql.io._
-import org.apache.hadoop.hive.ql.plan.{FileSinkDesc, TableDesc}
-import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils.ObjectInspectorCopyOption
-import org.apache.hadoop.hive.serde2.objectinspector.{ObjectInspector, ObjectInspectorFactory, ObjectInspectorUtils, StructObjectInspector}
-import org.apache.hadoop.hive.serde2.{AbstractSerDe, Deserializer, Serializer}
 import org.apache.hadoop.io.Writable
 import org.apache.hadoop.mapred.{JobConf, Reporter}
 import org.apache.spark.TaskContext
@@ -42,9 +47,6 @@ import org.apache.spark.sql.catalyst.expressions.{Cast, Concat, Expression, Lite
 import org.apache.spark.sql.execution.datasources.PartitioningUtils
 import org.apache.spark.sql.hive.Hive3Inspectors
 import org.apache.spark.sql.types.StringType
-
-import scala.collection.JavaConverters._
-import scala.collection.mutable
 
 abstract private[writer] class HiveAcidWriter(val options: WriterOptions,
                                               val HiveAcidOptions: HiveAcidWriterOptions)
