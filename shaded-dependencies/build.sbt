@@ -81,7 +81,7 @@ assemblyShadeRules in assembly := Seq(
 	ShadeRule.rename("com.readytalk.metrics.**" -> "com.qubole.shaded.readytalk.metrics.@1").inAll
 )
 
-import sbtassembly.AssemblyPlugin.autoImport.ShadeRule
+import sbtassembly.AssemblyPlugin.autoImport.{ ShadeRule}
 import sbtassembly.MergeStrategy
 val distinctAndReplace: sbtassembly.MergeStrategy = new sbtassembly.MergeStrategy {
     val name = "distinctAndReplace"

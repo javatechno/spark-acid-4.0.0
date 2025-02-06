@@ -2,7 +2,6 @@ package com.qubole.shaded.hadoop.hive.ql.io.orc
 
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hive.ql.io.AcidUtils
-
 import org.apache.hadoop.hive.ql.io.orc.{OrcSplit, VectorizedOrcAcidRowBatchReader}
 
 //import org.apache.hadoop.hive.ql.io.orc.{OrcSplit, VectorizedOrcAcidRowBatchReader}
