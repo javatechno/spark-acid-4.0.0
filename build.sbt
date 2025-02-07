@@ -37,7 +37,7 @@ resolvers += "Maven Central Server" at "https://repo1.maven.org/maven2/"
 /** ************************
  * Spark package settings
  */
-sparkVersion := sys.props.getOrElse("spark.version", "3.5.3")
+sparkVersion := sys.props.getOrElse("spark.version", "3.5.2")
 
 spIncludeMaven := true
 
@@ -53,7 +53,7 @@ dependencyOverrides ++= Seq(
   "org.apache.hive" % "hive-common" % "4.0.1" % "test",
   "org.apache.hive" % "hive-serde" % "4.0.1" % "test",
   "org.apache.hive" % "hive-exec" % "4.0.1" % "test",
-  "org.apache.hive" % "hive-metastore" % "4.0.1" % "test",
+//  "org.apache.hive" % "hive-metastore" % "4.0.1" % "test",
   //  "org.apache.hive" % "hive-metastore" % "2.3.9" % "test",
   //  "org.apache.hive" % "hive-exec" % "2.3.9" % "test",
 
@@ -145,7 +145,7 @@ libraryDependencies ++= Seq(
 libraryDependencies ++= Seq(
   // intransitive() because we don't want to include any transitive dependencies of shaded-dependencies jar in main jar
   // ideally all such dependencies should be shaded inside shaded-dependencies jar
-  "com.qubole" %% "spark-acid-shaded-dependencies" % sys.props.getOrElse("package.version", "0.1") intransitive()
+  "com.qubole" %% "spark-acid-shaded-dependencies" % sys.props.getOrElse("package.version", "0.1.1") intransitive()
 )
 
 /** ************************************

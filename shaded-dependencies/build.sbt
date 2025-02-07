@@ -1,6 +1,6 @@
 name := "spark-acid-shaded-dependencies"
 
-version := sys.props.getOrElse("package.version", "0.1")
+version := sys.props.getOrElse("package.version", "0.1.1")
 
 organization:= "com.qubole"
 
@@ -13,7 +13,7 @@ scalacOptions ++= Seq(
 	"-unchecked",
 	"-optimise"
 )
-javacOptions ++= Seq("-source", "8", "-target", "8")
+
 scalacOptions in (Compile, doc) ++= Seq(
 	"-no-link-warnings" // Suppresses problems with Scaladoc @throws links
 )
@@ -27,7 +27,7 @@ publishArtifact in (Compile, packageSrc) := false
 
 publishArtifact in (Compile, packageBin) := false
 
-val hive_version = sys.props.getOrElse("hive.version", "4.0.1")
+val hive_version = sys.props.getOrElse("hive.version", "3.1.3")
 
 val orc_version = sys.props.getOrElse("orc.version", "1.5.6")
 
@@ -37,7 +37,7 @@ resolvers += "Additional Maven Repository" at sys.props.getOrElse("hive.repo", "
 libraryDependencies ++= Seq(
 	// Hive/Orc core dependencies packed.
 	"org.apache.hive" % "hive-metastore" % hive_version intransitive(),
-	"org.apache.hive" % "hive-exec" % hive_version intransitive(),
+	"org.apache.hive" % "hive-exec" % "4.0.1" intransitive(),
 	"org.apache.orc" % "orc-core" % orc_version intransitive(),
 	"org.apache.orc" % "orc-mapreduce" % orc_version intransitive(),
 
@@ -101,7 +101,7 @@ assemblyMergeStrategy in assembly := {
 	case PathList("javax", xs @ _*) => MergeStrategy.discard
 	case PathList("javolution", xs @_*) => MergeStrategy.discard
 		// discard non shaded classes in hadoop and qubole packages
-	case PathList("org", "apache", "hadoop", xs @_*) => MergeStrategy.discard
+	case PathList("org", "apache", "hadoop", xs @_*) => MergeStrategy.first
 	case PathList("org", "apache", "log4j", xs @ _*) => MergeStrategy.last
 	case PathList("com", "google", xs @ _*) => MergeStrategy.last
 	case PathList("com", "esotericsoftware", xs @ _*) => MergeStrategy.last
