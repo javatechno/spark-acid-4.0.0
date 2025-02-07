@@ -27,7 +27,7 @@ publishArtifact in (Compile, packageSrc) := false
 
 publishArtifact in (Compile, packageBin) := false
 
-val hive_version = sys.props.getOrElse("hive.version", "3.1.3")
+val hive_version = sys.props.getOrElse("hive.version", "4.0.1")
 
 val orc_version = sys.props.getOrElse("orc.version", "1.5.6")
 
@@ -36,25 +36,30 @@ resolvers += "Additional Maven Repository" at sys.props.getOrElse("hive.repo", "
 // Shaded dependency
 libraryDependencies ++= Seq(
 	// Hive/Orc core dependencies packed.
-	"org.apache.hive" % "hive-metastore" % hive_version intransitive(),
-	"org.apache.hive" % "hive-exec" % "4.0.1" intransitive(),
+// commented because these classes from hive-metastore duplcate classes in hive-exec	
+//	"org.apache.hive" % "hive-metastore" % hive_version intransitive(),
+	"org.apache.hive" % "hive-exec" % hive_version intransitive(),
 	"org.apache.orc" % "orc-core" % orc_version intransitive(),
 	"org.apache.orc" % "orc-mapreduce" % orc_version intransitive(),
 
 	// Only for hive3 client in tests.. but packing it in shaded jars.
-	"org.apache.hive" % "hive-jdbc" % hive_version intransitive(),
-	"org.apache.hive" % "hive-service" % hive_version intransitive(),
-	"org.apache.hive" % "hive-serde" % hive_version intransitive(),
-	"org.apache.hive" % "hive-common" % hive_version intransitive(),
+//	"org.apache.hive" % "hive-jdbc" % hive_version intransitive(),
+//	"org.apache.hive" % "hive-service" % hive_version intransitive(),
+//	"org.apache.hive" % "hive-serde" % hive_version intransitive(),
+//	"org.apache.hive" % "hive-common" % hive_version intransitive(),
 	
 	// To deal with hive3 metastore library 0.9.3 vs zeppelin thirft
 	// library version 0.9.1 conflict when runing Notebooks.
-	"org.apache.thrift" % "libfb303" % "0.9.3",
-	"org.apache.thrift" % "libthrift" % "0.9.3"
+
+// commented because these libs exist in hive-exec
+//	"org.apache.thrift" % "libfb303" % "0.9.3",
+//	"org.apache.thrift" % "libthrift" % "0.9.3"
 )
 
-
+// remove HiveParser from shading
+// can break library... 
 assemblyShadeRules in assembly := Seq(
+	ShadeRule.zap("org.apache.hadoop.hive.ql.parse.HiveParser").inAll,
 	ShadeRule.rename("org.apache.hadoop.hive.**" -> "com.qubole.shaded.hadoop.hive.@1").inAll,
 	ShadeRule.rename("org.apache.hive.**" -> "com.qubole.shaded.hive.@1").inAll,
 	ShadeRule.rename("org.apache.orc.**" -> "com.qubole.shaded.orc.@1").inAll,
@@ -98,7 +103,8 @@ val distinctAndReplace: sbtassembly.MergeStrategy = new sbtassembly.MergeStrateg
 
 assemblyMergeStrategy in assembly := {
 	// all discarded classes first
-	case PathList("javax", xs @ _*) => MergeStrategy.discard
+        case PathList("META-INF", "versions", xs @ _*)  => MergeStrategy.discard
+        case PathList("javax", xs @ _*) => MergeStrategy.discard
 	case PathList("javolution", xs @_*) => MergeStrategy.discard
 		// discard non shaded classes in hadoop and qubole packages
 	case PathList("org", "apache", "hadoop", xs @_*) => MergeStrategy.first
