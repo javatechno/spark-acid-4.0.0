@@ -332,7 +332,18 @@ _NB: Hive ACID V2 is supported in Hive 3.0.0 onwards and for that hive Metastore
     cd shaded-dependencies
     sbt clean publishLocal
 
-2. Next, build the main project:
+2. Got errors about incompatible version of some classes META-INF/versions (Unsupported class file major versio). 
+3. Go to cache directorys 
+
+    cd ~/.ivy2/cache/org.apache.hive/hive-exec/jars
+    zip -d hive-exec-4.0.1.jar META-INF/versions
+
+4. Run compilation again
+
+    cd shaded-dependencies
+    sbt clean publishLocal
+
+5. Next, build the main project:
 
 	sbt assembly
 
