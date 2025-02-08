@@ -68,6 +68,10 @@ dependencyOverrides ++= Seq(
 /** **********************
  * Library Dependencies
  */
+libraryDependencies ++= Seq(
+  "org.apache.hive" % "hive-exec" % "4.0.1" exclude("org.apache.orc", "orc-core"),
+  "org.apache.hive" % "hive-metastore" % "4.0.1" exclude("org.apache.orc", "orc-core")
+)
 libraryDependencies += "org.scala-lang" % "scala-library" % scalaVersion.value
 libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.6"
 
@@ -145,7 +149,7 @@ libraryDependencies ++= Seq(
 libraryDependencies ++= Seq(
   // intransitive() because we don't want to include any transitive dependencies of shaded-dependencies jar in main jar
   // ideally all such dependencies should be shaded inside shaded-dependencies jar
-  "com.qubole" %% "spark-acid-shaded-dependencies" % sys.props.getOrElse("package.version", "0.1.1") intransitive()
+  "com.qubole" %% "spark-acid-shaded-dependencies" % sys.props.getOrElse("package.version", "0.1.3") intransitive()
 )
 
 /** ************************************

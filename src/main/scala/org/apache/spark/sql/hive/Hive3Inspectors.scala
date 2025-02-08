@@ -22,13 +22,13 @@ package org.apache.spark.sql.hive
 import java.lang.reflect.{ParameterizedType, Type, WildcardType}
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder, ResolverStyle, SignStyle}
 import java.time.temporal.ChronoField
-
 import scala.collection.JavaConverters._
 import com.qubole.shaded.hadoop.hive.common.`type`.{Date, HiveChar, HiveDecimal, HiveVarchar, Timestamp, TimestampUtils}
 import com.qubole.shaded.hadoop.hive.serde2.{io => hiveIo}
 import com.qubole.shaded.hadoop.hive.serde2.objectinspector.{StructField => HiveStructField, _}
 import com.qubole.shaded.hadoop.hive.serde2.objectinspector.primitive._
-import com.qubole.shaded.hadoop.hive.serde2.typeinfo.{DecimalTypeInfo, TypeInfoFactory}
+import com.qubole.shaded.hadoop.hive.serde2.typeinfo.TypeInfoFactory.{binaryTypeInfo, booleanTypeInfo, byteTypeInfo, dateTypeInfo, doubleTypeInfo, floatTypeInfo, getListTypeInfo, getMapTypeInfo, getStructTypeInfo, intTypeInfo, longTypeInfo, shortTypeInfo, stringTypeInfo, timestampTypeInfo, voidTypeInfo}
+import com.qubole.shaded.hadoop.hive.serde2.typeinfo.{DecimalTypeInfo, TypeInfo, TypeInfoFactory}
 import com.qubole.spark.hiveacid.AnalysisException
 import org.apache.hadoop.{io => hadoopIo}
 import org.apache.spark.sql.catalyst.InternalRow

@@ -20,31 +20,31 @@
 package com.qubole.spark.hiveacid.rdd
 
 
-import java.io.{FileNotFoundException, IOException}
-import java.text.SimpleDateFormat
-import java.util.concurrent.ConcurrentHashMap
-import java.util.{Date, Locale}
-import scala.collection.mutable.ListBuffer
-import scala.reflect.ClassTag
 import com.qubole.shaded.hadoop.hive.common.ValidWriteIdList
 import com.qubole.shaded.hadoop.hive.ql.io.{AcidInputFormat, AcidUtils, HiveInputFormat, RecordIdentifier}
 import com.qubole.spark.hiveacid.rdd.HiveAcidRDD.HiveAcidPartitionsWithSplitRDD
 import com.qubole.spark.hiveacid.reader.hive.HiveAcidPartitionComputer
-import com.qubole.spark.hiveacid.util.Util
-import com.qubole.spark.hiveacid.util.{SerializableWritable => _}
+import com.qubole.spark.hiveacid.util.{Util, SerializableWritable => _}
 import org.apache.hadoop.conf.{Configurable, Configuration}
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.mapred._
 import org.apache.hadoop.mapreduce.TaskType
 import org.apache.hadoop.util.ReflectionUtils
-import org.apache.spark.{Partitioner, _}
 import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.util.SerializableConfiguration
+import org.apache.spark.{Partitioner, _}
+
+import java.io.{FileNotFoundException, IOException}
+import java.text.SimpleDateFormat
+import java.util.concurrent.ConcurrentHashMap
+import java.util.{Date, Locale}
+import scala.collection.JavaConverters.{bufferAsJavaListConverter, seqAsJavaListConverter}
+import scala.collection.mutable.ListBuffer
+import scala.reflect.ClassTag
 
 // This file has lot of borrowed code from org.apache.spark.rdd.HadoopRdd
 private object Cache {
