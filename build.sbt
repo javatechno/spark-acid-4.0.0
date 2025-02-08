@@ -68,10 +68,7 @@ dependencyOverrides ++= Seq(
 /** **********************
  * Library Dependencies
  */
-libraryDependencies ++= Seq(
-  "org.apache.hive" % "hive-exec" % "4.0.1" exclude("org.apache.orc", "orc-core"),
-  "org.apache.hive" % "hive-metastore" % "4.0.1" exclude("org.apache.orc", "orc-core")
-)
+
 libraryDependencies += "org.scala-lang" % "scala-library" % scalaVersion.value
 libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.6"
 
