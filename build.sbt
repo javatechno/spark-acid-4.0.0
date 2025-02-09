@@ -26,6 +26,18 @@ organization := "com.qubole"
  */
 
 crossScalaVersions := Seq("2.13.8")
+scalaVersion := "2.13.8"
+scalacOptions ++= Seq(
+  "-Xlint",
+  "-Xfatal-warnings",
+  "-deprecation",
+  "-encoding", "utf8",
+  "-unchecked",
+  "-optimise",
+  "-language:postfixOps"
+)
+javacOptions ++= Seq("-source", "11", "-target", "11")
+scalacOptions ++= Seq("-target:jvm-11")
 
 scalaVersion := crossScalaVersions.value.head
 
@@ -199,7 +211,7 @@ spShade := true
 
 spAppendScalaVersion := true
 
-publishMavenStyle := true
+publishMavenStyle := false
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard

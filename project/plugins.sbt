@@ -1,5 +1,6 @@
 
 resolvers += "spark-packages" at sys.props.getOrElse("spark.repo", "https://repos.spark-packages.org/")
+resolvers += "Maven ICM" at "https://maven.icm.edu.pl/artifactory/repo/"
 
 addSbtPlugin("org.spark-packages" % "sbt-spark-package" % "0.2.6")
 addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.11")
