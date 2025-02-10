@@ -31,11 +31,11 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.SqlUtils
 import com.qubole.shaded.thrift.TException
-import org.apache.hadoop.hive.metastore.txn.TxnCommonUtils
+import com.qubole.shaded.hadoop.hive.metastore.txn.TxnCommonUtils
 
 import scala.collection.JavaConverters._
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
-import scala.jdk.CollectionConverters.IterableHasAsJava
+
 import scala.language.implicitConversions
 
 /**
