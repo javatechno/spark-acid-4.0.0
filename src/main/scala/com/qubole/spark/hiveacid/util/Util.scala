@@ -28,7 +28,13 @@ import scala.util.control.NonFatal
 private[hiveacid] object Util extends Logging {
 
   def classForName(className: String, loadShaded: Boolean = false): Class[_] = {
-    Class.forName(className, true, Thread.currentThread().getContextClassLoader)
+    // Class.forName(className, true, Thread.currentThread().getContextClassLoader)
+       val classToLoad = if (loadShaded) {
+      className.replaceFirst("org.apache.hadoop.hive.", "com.qubole.shaded.hadoop.hive.")
+    } else {
+      className
+    }
+    Class.forName(classToLoad, true, Thread.currentThread().getContextClassLoader)
   }
 
   /**

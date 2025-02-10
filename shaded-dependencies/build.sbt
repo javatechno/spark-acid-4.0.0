@@ -106,6 +106,7 @@ assemblyShadeRules in assembly := Seq(
 	ShadeRule.rename("org.openx.data.**" -> "com.qubole.shaded.openx.data.@1").inAll,
 	ShadeRule.rename("au.com.bytecode.opencsv.**" -> "com.qubole.shaded.au.com.bytecode.opencsv.@1").inAll,
 	ShadeRule.rename("com.readytalk.metrics.**" -> "com.qubole.shaded.readytalk.metrics.@1").inAll
+	// ShadeRule.keep("org.apache.hadoop.hive.ql.io.orc.**").inAll
 )
 
 import sbtassembly.AssemblyPlugin.autoImport.{ShadeRule}
