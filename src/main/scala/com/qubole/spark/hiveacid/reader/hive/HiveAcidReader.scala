@@ -30,9 +30,9 @@ import com.qubole.shaded.hadoop.hive.metastore.api.hive_metastoreConstants._
 import com.qubole.shaded.hadoop.hive.metastore.utils.MetaStoreUtils.{getColumnNamesFromFieldSchema, getColumnTypesFromFieldSchema}
 import com.qubole.shaded.hadoop.hive.ql.exec.Utilities
 import com.qubole.shaded.hadoop.hive.ql.io.{AcidUtils, RecordIdentifier}
-import com.qubole.shaded.hadoop.hive.ql.metadata.{Partition => HiveJarPartition, Table => HiveTable}
+import com.qubole.shaded.hadoop.hive.ql.metadata.{HiveUtils, Partition => HiveJarPartition, Table => HiveTable}
 import com.qubole.shaded.hadoop.hive.ql.plan.TableDesc
-import com.qubole.shaded.hadoop.hive.serde2.Deserializer
+import com.qubole.shaded.hadoop.hive.serde2.{AbstractSerDe, Deserializer}
 import com.qubole.shaded.hadoop.hive.serde2.objectinspector.{ObjectInspectorConverters, StructObjectInspector}
 import com.qubole.shaded.hadoop.hive.serde2.objectinspector.primitive._
 import com.qubole.spark.hiveacid.HiveAcidErrors
@@ -506,7 +506,7 @@ private[reader] object HiveAcidReader extends Hive3Inspectors with Logging {
                                                       conf: Configuration, input: Boolean) {
     val property = tableDesc.getProperties.getProperty(META_TABLE_STORAGE)
     val storageHandler =
-      org.apache.hadoop.hive.ql.metadata.HiveUtils.getStorageHandler(conf, property)
+      HiveUtils.getStorageHandler(conf, property)
     if (storageHandler != null) {
       val jobProperties = new java.util.LinkedHashMap[String, String]
       if (input) {

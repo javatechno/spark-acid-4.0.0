@@ -14,8 +14,8 @@ scalacOptions ++= Seq(
 	"-optimise"
 )
 
-javacOptions ++= Seq("-source", "21", "-target", "21")
-scalacOptions ++= Seq("-target:jvm-21")
+javacOptions ++= Seq("-source", "8", "-target", "8")
+scalacOptions ++= Seq("-target:jvm-8")
 
 //scalacOptions in (Compile, doc) ++= Seq(
 //	"-no-link-warnings" // Suppresses problems with Scaladoc @throws links
@@ -44,10 +44,10 @@ libraryDependencies ++= Seq(
 	"org.apache.orc" % "orc-core" % orc_version intransitive(),
 	"org.apache.orc" % "orc-mapreduce" % orc_version intransitive(),
 	// Only for hive3 client in tests.. but packing it in shaded jars.
-	//	"org.apache.hive" % "hive-jdbc" % hive_version intransitive(),
-	//	"org.apache.hive" % "hive-service" % hive_version intransitive(),
-	//	"org.apache.hive" % "hive-serde" % hive_version intransitive(),
-	//	"org.apache.hive" % "hive-common" % hive_version intransitive(),
+	"org.apache.hive" % "hive-jdbc" % hive_version intransitive(),
+	"org.apache.hive" % "hive-service" % hive_version intransitive(),
+//	"org.apache.hive" % "hive-serde" % hive_version intransitive(),
+//	"org.apache.hive" % "hive-common" % hive_version intransitive(),
 
 	// To deal with hive3 metastore library 0.9.3 vs zeppelin thirft
 	// library version 0.9.1 conflict when runing Notebooks.

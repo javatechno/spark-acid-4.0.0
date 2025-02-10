@@ -17,16 +17,13 @@
 
 package com.qubole.spark.hiveacid.hive
 
-import java.lang.reflect.InvocationTargetException
-import java.util.Locale
-import scala.collection.mutable
 import com.qubole.shaded.hadoop.hive.conf.HiveConf
 import com.qubole.shaded.hadoop.hive.ql.io.RecordIdentifier
 import com.qubole.shaded.hadoop.hive.ql.metadata
 import com.qubole.shaded.hadoop.hive.ql.metadata.Hive
 import com.qubole.shaded.hadoop.hive.ql.plan.TableDesc
-import com.qubole.spark.hiveacid.util.Util
 import com.qubole.spark.hiveacid.HiveAcidErrors
+import com.qubole.spark.hiveacid.util.Util
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.Writable
 import org.apache.hadoop.mapred.{InputFormat, OutputFormat}
