@@ -59,7 +59,9 @@ libraryDependencies ++= Seq(
 	//	"org.apache.thrift" % "libthrift" % "0.9.3"
         "commons-codec" % "commons-codec" % "1.15" intransitive(),
 		"org.apache.commons" % "commons-math3" % "3.6.1" intransitive(),
-  	    "org.apache.commons" % "commons-collections4" % "4.1" intransitive()
+  	    "org.apache.commons" % "commons-collections4" % "4.1" intransitive(),
+       "org.apache.httpcomponents" % "httpclient" % "4.5.13"  intransitive(),
+       "org.apache.httpcomponents" % "httpcore" % "4.4.13"  intransitive()
 
 )
 
