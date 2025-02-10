@@ -4,7 +4,9 @@ version := sys.props.getOrElse("package.version", "0.1.3")
 
 organization:= "com.qubole"
 
-scalaVersion := "2.13.11"
+scalaVersion := "2.12.20"
+javacOptions ++= Seq("-source", "11", "-target", "11")
+scalacOptions ++= Seq("-target:jvm-11")
 scalacOptions ++= Seq(
 	"-Xlint",
 	"-Xfatal-warnings",
@@ -14,8 +16,8 @@ scalacOptions ++= Seq(
 	"-optimise"
 )
 
-javacOptions ++= Seq("-source", "8", "-target", "8")
-scalacOptions ++= Seq("-target:jvm-8")
+javacOptions ++= Seq("-source", "11", "-target", "11")
+scalacOptions ++= Seq("-target:jvm-11")
 
 //scalacOptions in (Compile, doc) ++= Seq(
 //	"-no-link-warnings" // Suppresses problems with Scaladoc @throws links
