@@ -4,9 +4,11 @@ version := sys.props.getOrElse("package.version", "0.1.3")
 
 organization:= "com.qubole"
 
-scalaVersion := "2.12.20"
-javacOptions ++= Seq("-source", "11", "-target", "11")
-scalacOptions ++= Seq("-target:jvm-11")
+scalaVersion := "2.13.8"
+javacOptions ++= Seq("-source", "8", "-target", "8")
+// javacOptions ++= Seq("-source", "11", "-target", "11")
+scalacOptions ++= Seq("-target:jvm-8")
+// scalacOptions ++= Seq("-target:jvm-11")
 scalacOptions ++= Seq(
 	"-Xlint",
 	"-Xfatal-warnings",
@@ -55,10 +57,15 @@ libraryDependencies ++= Seq(
 	// library version 0.9.1 conflict when runing Notebooks.
 	//	"org.apache.thrift" % "libfb303" % "0.9.3",
 	//	"org.apache.thrift" % "libthrift" % "0.9.3"
+        "commons-codec" % "commons-codec" % "1.15" intransitive(),
+		"org.apache.commons" % "commons-math3" % "3.6.1" intransitive(),
+  	    "org.apache.commons" % "commons-collections4" % "4.1" intransitive()
+
 )
 
 
 assemblyShadeRules in assembly := Seq(
+        ShadeRule.zap("org.apache.hadoop.hive.ql.parse.HiveParser").inAll,
 	ShadeRule.rename("org.apache.hadoop.hive.ql.**" -> "com.qubole.shaded.hadoop.hive.ql.@1")
 		.inAll
 	//		.exclude("META-INF/versions/17/com/fasterxml/jackson/core/io/doubleparser/FastDoubleSwar.class")
@@ -66,7 +73,7 @@ assemblyShadeRules in assembly := Seq(
 	//		.exclude("META-INF/versions/21/com/fasterxml/jackson/core/io/doubleparser/FastIntegerMath.class")
 	//		.exclude("META-INF/versions/21/com/fasterxml/jackson/core/io/doubleparser/FastIntegerMath.class")
 	,
-	ShadeRule.zap("org.apache.hive.com.fasterxml.jackson.core.io.**").inAll,
+	// ShadeRule.zap("org.apache.hive.com.fasterxml.jackson.core.io.**").inAll,
 	ShadeRule.rename("org.apache.hadoop.hive.**" -> "com.qubole.shaded.hadoop.hive.@1").inAll,
 	ShadeRule.rename("org.apache.hive.**" -> "com.qubole.shaded.hive.@1").inAll,
 	//	ShadeRule.rename("org.apache.hadoop.hive.ql.io.**" -> "com.qubole.shaded.hadoop.hive.ql.io.@1").inAll,

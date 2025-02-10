@@ -25,9 +25,11 @@ organization := "com.qubole"
  * Scala settings
  */
 
-crossScalaVersions := Seq("2.12.20")
-javacOptions ++= Seq("-source", "11", "-target", "11")
-scalacOptions ++= Seq("-target:jvm-11")
+crossScalaVersions := Seq("2.13.8")
+//javacOptions ++= Seq("-source", "11", "-target", "11")
+javacOptions ++= Seq("-source", "8", "-target", "8")
+// scalacOptions ++= Seq("-target:jvm-11")
+scalacOptions ++= Seq("-target:jvm-8")
 scalaVersion := crossScalaVersions.value.head
 
 resolvers += Resolver.jcenterRepo
@@ -187,7 +189,7 @@ excludeDependencies ++= Seq(
 //  "org.apache.orc" % "orc-core",
 //  "org.apache.orc" % "orc-mapreduce",
 
-  "org.slf4j" % "slf4j-api"
+//  "org.slf4j" % "slf4j-api"
 )
 
 // do not run test at assembly
