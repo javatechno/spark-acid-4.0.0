@@ -23,11 +23,11 @@ import com.qubole.shaded.hadoop.hive.common.{ValidReaderWriteIdList, ValidWriteI
 import com.qubole.spark.hiveacid.rdd.{HiveAcidPartition, HiveAcidRDD, HiveSplitInfo}
 import com.qubole.spark.hiveacid.reader.hive.HiveAcidPartitionComputer.{addToPartitionCache, getInputFormat}
 import com.qubole.spark.hiveacid.util.Util
-import org.apache.hadoop.conf.Configurable
-import org.apache.hadoop.fs.Path
-import org.apache.hadoop.io.Writable
-import org.apache.hadoop.mapred.{FileInputFormat, InputFormat, InvalidInputException, JobConf}
-import org.apache.hadoop.util.ReflectionUtils
+import com.qubole.shaded.hadoop.conf.Configurable
+import com.qubole.shaded.hadoop.fs.Path
+import com.qubole.shaded.hadoop.io.Writable
+import com.qubole.shaded.hadoop.mapred.{FileInputFormat, InputFormat, InvalidInputException, JobConf}
+import com.qubole.shaded.hadoop.util.ReflectionUtils
 import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD

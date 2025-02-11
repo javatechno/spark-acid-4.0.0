@@ -24,9 +24,9 @@ import com.qubole.shaded.hadoop.hive.ql.metadata.Hive
 import com.qubole.shaded.hadoop.hive.ql.plan.TableDesc
 import com.qubole.spark.hiveacid.HiveAcidErrors
 import com.qubole.spark.hiveacid.util.Util
-import org.apache.hadoop.fs.Path
-import org.apache.hadoop.io.Writable
-import org.apache.hadoop.mapred.{InputFormat, OutputFormat}
+import com.qubole.shaded.hadoop.fs.Path
+import com.qubole.shaded.hadoop.io.Writable
+import com.qubole.shaded.hadoop.mapred.{InputFormat, OutputFormat}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql._
 import org.apache.spark.sql.types._

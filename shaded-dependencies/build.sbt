@@ -44,6 +44,7 @@ resolvers += "Additional Maven Repository" at sys.props.getOrElse("hive.repo", "
 libraryDependencies ++= Seq(
 	// Hive/Orc core dependencies packed.
 	"org.apache.hive" % "hive-metastore" % hive_version intransitive(),
+	"org.apache.hadoop" % "hadoop-client-api" % "3.4.1" intransitive(),
 	"org.apache.hive" % "hive-exec" % hive_version intransitive(),
 	"org.apache.orc" % "orc-core" % orc_version intransitive(),
 	"org.apache.orc" % "orc-mapreduce" % orc_version intransitive(),
@@ -76,7 +77,8 @@ assemblyShadeRules in assembly := Seq(
 	//		.exclude("META-INF/versions/21/com/fasterxml/jackson/core/io/doubleparser/FastIntegerMath.class")
 	,
 	// ShadeRule.zap("org.apache.hive.com.fasterxml.jackson.core.io.**").inAll,
-	ShadeRule.rename("org.apache.hadoop.hive.**" -> "com.qubole.shaded.hadoop.hive.@1").inAll,
+//	ShadeRule.rename("org.apache.hadoop.hive.**" -> "com.qubole.shaded.hadoop.hive.@1").inAll,
+	ShadeRule.rename("org.apache.hadoop.**" -> "com.qubole.shaded.hadoop.@1").inAll,
 	ShadeRule.rename("org.apache.hive.**" -> "com.qubole.shaded.hive.@1").inAll,
 	//	ShadeRule.rename("org.apache.hadoop.hive.ql.io.**" -> "com.qubole.shaded.hadoop.hive.ql.io.@1").inAll,
 	//	ShadeRule.rename("org.apache.hadoop.hive.metastore.**" -> "com.qubole.shaded.hadoop.hive.metastore.@1").inAll,

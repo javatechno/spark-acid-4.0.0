@@ -22,7 +22,7 @@ package com.qubole.spark.hiveacid.streaming
 
 import com.qubole.spark.hiveacid.{HiveAcidErrors, HiveAcidTable}
 import com.qubole.spark.hiveacid.hive.HiveAcidMetadata
-import org.apache.hadoop.fs.Path
+import com.qubole.shaded.hadoop.fs.Path
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.execution.streaming.Sink

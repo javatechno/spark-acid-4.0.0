@@ -2,8 +2,8 @@ package com
 
 import com.dimafeng.testcontainers.GenericContainer
 import com.dimafeng.testcontainers.GenericContainer.FileSystemBind
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.FileSystem
+import com.qubole.shaded.hadoop.conf.Configuration
+import com.qubole.shaded.hadoop.fs.FileSystem
 import org.apache.spark.sql._
 import org.apache.spark.{SparkConf, SparkContext}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}

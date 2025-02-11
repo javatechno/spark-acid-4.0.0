@@ -1,7 +1,7 @@
 package com.qubole.shaded.hadoop.hive.ql.io.orc
 
 import com.qubole.shaded.hadoop.hive.ql.io.AcidUtils
-import org.apache.hadoop.fs.Path
+import com.qubole.shaded.hadoop.fs.Path
 
 import java.util.regex.Pattern
 

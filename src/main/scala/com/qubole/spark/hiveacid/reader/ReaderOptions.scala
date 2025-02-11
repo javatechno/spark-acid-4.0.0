@@ -22,7 +22,7 @@ package com.qubole.spark.hiveacid.reader
 
 import com.qubole.spark.hiveacid.SparkAcidConf
 
-import org.apache.hadoop.conf.Configuration
+import com.qubole.shaded.hadoop.conf.Configuration
 
 import org.apache.spark.sql.catalyst.expressions.Attribute
 import org.apache.spark.sql.sources.Filter

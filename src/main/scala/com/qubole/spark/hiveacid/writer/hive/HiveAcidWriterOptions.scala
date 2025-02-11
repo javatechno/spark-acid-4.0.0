@@ -24,7 +24,7 @@ import com.qubole.shaded.hadoop.hive.ql.plan.FileSinkDesc
 import com.qubole.spark.hiveacid.HiveAcidOperation
 import com.qubole.spark.hiveacid.hive.HiveAcidMetadata
 import com.qubole.spark.hiveacid.writer.WriterOptions
-import org.apache.hadoop.fs.Path
+import com.qubole.shaded.hadoop.fs.Path
 
 private[writer] class HiveAcidWriterOptions(val rootPath: String,
                                             fileSinkDesc: FileSinkDesc) extends Serializable {

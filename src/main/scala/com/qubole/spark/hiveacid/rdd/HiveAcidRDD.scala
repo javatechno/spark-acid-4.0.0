@@ -25,11 +25,11 @@ import com.qubole.shaded.hadoop.hive.ql.io.{AcidInputFormat, AcidUtils, HiveInpu
 import com.qubole.spark.hiveacid.rdd.HiveAcidRDD.HiveAcidPartitionsWithSplitRDD
 import com.qubole.spark.hiveacid.reader.hive.HiveAcidPartitionComputer
 import com.qubole.spark.hiveacid.util.{Util, SerializableWritable => _}
-import org.apache.hadoop.conf.{Configurable, Configuration}
-import org.apache.hadoop.fs.Path
-import org.apache.hadoop.mapred._
-import org.apache.hadoop.mapreduce.TaskType
-import org.apache.hadoop.util.ReflectionUtils
+import com.qubole.shaded.hadoop.conf.{Configurable, Configuration}
+import com.qubole.shaded.hadoop.fs.Path
+import com.qubole.shaded.hadoop.mapred._
+import com.qubole.shaded.hadoop.mapreduce.TaskType
+import com.qubole.shaded.hadoop.util.ReflectionUtils
 import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.internal.Logging

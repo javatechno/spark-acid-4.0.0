@@ -21,9 +21,9 @@ package com.qubole.spark.hiveacid.util
 
 import java.io._
 
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.io.ObjectWritable
-import org.apache.hadoop.io.Writable
+import com.qubole.shaded.hadoop.conf.Configuration
+import com.qubole.shaded.hadoop.io.ObjectWritable
+import com.qubole.shaded.hadoop.io.Writable
 
 /**
  * Utility class to make a Writable serializable

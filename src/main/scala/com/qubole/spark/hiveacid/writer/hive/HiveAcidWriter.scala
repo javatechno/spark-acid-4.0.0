@@ -30,9 +30,9 @@ import com.qubole.spark.hiveacid.hive.HiveAcidMetadata
 import com.qubole.spark.hiveacid.util.Util
 import com.qubole.spark.hiveacid.writer.{Writer, WriterOptions}
 import com.qubole.spark.hiveacid.{HiveAcidErrors, HiveAcidOperation}
-import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.hadoop.io.Writable
-import org.apache.hadoop.mapred.{JobConf, Reporter}
+import com.qubole.shaded.hadoop.fs.{FileSystem, Path}
+import com.qubole.shaded.hadoop.io.Writable
+import com.qubole.shaded.hadoop.mapred.{JobConf, Reporter}
 import org.apache.spark.TaskContext
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow

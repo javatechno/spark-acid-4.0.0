@@ -30,7 +30,7 @@ import com.qubole.shaded.hadoop.hive.serde2.objectinspector.primitive._
 import com.qubole.shaded.hadoop.hive.serde2.typeinfo.TypeInfoFactory.{binaryTypeInfo, booleanTypeInfo, byteTypeInfo, dateTypeInfo, doubleTypeInfo, floatTypeInfo, getListTypeInfo, getMapTypeInfo, getStructTypeInfo, intTypeInfo, longTypeInfo, shortTypeInfo, stringTypeInfo, timestampTypeInfo, voidTypeInfo}
 import com.qubole.shaded.hadoop.hive.serde2.typeinfo.{DecimalTypeInfo, TypeInfo, TypeInfoFactory}
 import com.qubole.spark.hiveacid.AnalysisException
-import org.apache.hadoop.{io => hadoopIo}
+import com.qubole.shaded.hadoop.{io => hadoopIo}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util._
