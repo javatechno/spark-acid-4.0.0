@@ -127,9 +127,12 @@ object HiveAcidTxn extends Logging {
   }
 
   private[hiveacid] def getValidWriteIds(txn: HiveAcidTxn, hiveAcidMetadata: HiveAcidMetadata) = {
+    logDebug("HiveAcidTxn getValidWriteIds: " + hiveAcidMetadata.toString)
     val validWriteIdList = if (txn.txnId == -1) {
+      logDebug("Called write id request before txn start: ")
       throw HiveAcidErrors.tableWriteIdRequestedBeforeTxnStart(hiveAcidMetadata.fullyQualifiedName)
     } else {
+      logDebug("Called write ids from txn manager. validTxnList is: " + txn.validTxnList.writeToString())
       txnManager.getValidWriteIds(txn.txnId, txn.validTxnList, hiveAcidMetadata.fullyQualifiedName)
     }
     validWriteIdList
@@ -173,8 +176,11 @@ object HiveAcidTxn extends Logging {
       false
     } else {
       // Compare the earlier writeIds of fullyQualifiedTableName with the current one.
+      logDebug(s"Previous WriteIdList: " + txnManager.getValidWriteIds(txn.txnId, txn.validTxnList, fullyQualifiedTableName).writeToString())
       val previousWriteIdList = txnManager.getValidWriteIds(txn.txnId, txn.validTxnList, fullyQualifiedTableName)
+      logDebug(s"Current Valid list: " + txnManager.getValidTxns(Some(txn.txnId)).writeToString())
       val currentValidList = txnManager.getValidTxns(Some(txn.txnId))
+      logDebug(s"Current WriteIdList: " + txnManager.getValidWriteIds(txn.txnId, currentValidList, fullyQualifiedTableName).writeToString())
       val currentWriteIdList = txnManager.getValidWriteIds(txn.txnId, currentValidList, fullyQualifiedTableName)
       // Checks if any new write transaction was started and committed
       // after opening transaction and before acquiring locks using HighWaterMark

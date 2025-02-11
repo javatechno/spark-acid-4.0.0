@@ -17,25 +17,22 @@
 
 package com.qubole.spark.hiveacid.transaction
 
-import java.util.concurrent.{Executors, ScheduledExecutorService, ThreadFactory, TimeUnit}
-import java.util.concurrent.atomic.AtomicBoolean
 import com.qubole.shaded.hadoop.hive.common.{ValidTxnList, ValidTxnWriteIdList, ValidWriteIdList}
-import com.qubole.shaded.hadoop.hive.metastore.api.{DataOperationType, LockRequest, LockResponse, LockState, TxnInfo}
+import com.qubole.shaded.hadoop.hive.metastore.api._
 import com.qubole.shaded.hadoop.hive.metastore.conf.MetastoreConf
-import com.qubole.shaded.hadoop.hive.metastore.txn.TxnUtils
+import com.qubole.shaded.hadoop.hive.metastore.txn.TxnCommonUtils
 import com.qubole.shaded.hadoop.hive.metastore.{IMetaStoreClient, LockComponentBuilder, LockRequestBuilder, RetryingMetaStoreClient}
+import com.qubole.shaded.thrift.TException
 import com.qubole.spark.hiveacid.datasource.HiveAcidDataSource
 import com.qubole.spark.hiveacid.hive.HiveConverter
 import com.qubole.spark.hiveacid.{HiveAcidErrors, HiveAcidOperation, SparkAcidConf}
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.SqlUtils
-import com.qubole.shaded.thrift.TException
-import com.qubole.shaded.hadoop.hive.metastore.txn.TxnCommonUtils
+import org.apache.spark.sql.{SparkSession, SqlUtils}
 
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.{Executors, ScheduledExecutorService, ThreadFactory, TimeUnit}
 import scala.collection.JavaConverters._
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
-
 import scala.language.implicitConversions
 
 /**
@@ -161,8 +158,14 @@ private[hiveacid] class HiveAcidTxnManager(sparkSession: SparkSession) extends L
     */
   def getValidTxns(txnIdOpt: Option[Long]): ValidTxnList = synchronized {
     txnIdOpt match {
-      case Some(id) => client.getValidTxns(id)
-      case None => client.getValidTxns()
+      case Some(id) => {
+        logDebug(s"HiveAcidTxnManager getValidTxns: "+client.getValidTxns(id).writeToString()+" id exists")
+        client.getValidTxns(id)
+      }
+      case None => {
+        logDebug(s"HiveAcidTxnManager getValidTxns: "+client.getValidTxns().writeToString()+" id does not exist")
+        client.getValidTxns()
+      }
     }
   }
 
@@ -193,14 +196,20 @@ private[hiveacid] class HiveAcidTxnManager(sparkSession: SparkSession) extends L
   private def getValidWriteIds(txnIdOpt: Option[Long],
                                validTxnList: ValidTxnList,
                                fullyQualifiedTableName: String): ValidWriteIdList = synchronized {
+    logDebug(s"HiveAcidTxnManager getValidWriteIds: "+validTxnList.writeToString()+" validTxnList method parameter")
+    logDebug(s"HiveAcidTxnManager getValidWriteIds: "+fullyQualifiedTableName+" fullyQualifiedTableName method parameter")
     val txnId = txnIdOpt match {
       case Some(id) => id
       case None => -1L
     }
+    logDebug(s"HiveAcidTxnManager getValidWriteIds: "+txnId+" txnId method parameter")
     val tableValidWriteIds = client.getValidWriteIds(List(fullyQualifiedTableName).asJava,
       validTxnList.writeToString())
+    logDebug(s"HiveAcidTxnManager getValidWriteIds: "+tableValidWriteIds.toString+" tableValidWriteIds received by client.getValidWriteIds(List(fullyQualifiedTableName))")
     val txnWriteIds: ValidTxnWriteIdList = TxnCommonUtils.createValidTxnWriteIdList(txnId,
       tableValidWriteIds)
+    logDebug(s"HiveAcidTxnManager getValidWriteIds: "+txnWriteIds.toString+" txnWriteIds received by  TxnCommonUtils.createValidTxnWriteIdList(txnId, tableValidWriteIds)")
+    logDebug(s"HiveAcidTxnManager getValidWriteIds: "+txnWriteIds.getTableValidWriteIdList(fullyQualifiedTableName).toString+" txnWriteIds.getTableValidWriteIdList ")
     txnWriteIds.getTableValidWriteIdList(fullyQualifiedTableName)
   }
 

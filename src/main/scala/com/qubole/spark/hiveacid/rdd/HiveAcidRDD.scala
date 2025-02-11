@@ -477,6 +477,7 @@ object HiveAcidRDD extends Logging {
     if (isFullAcidTable) {
       // If full ACID table, just set the right writeIds, the
       // OrcInputFormat.getSplits() will take care of the rest
+      logDebug(s"HiveAcidRDD setInputPathToJobConf. ValidWriteIds are: "+validWriteIds.writeToString()+" . JobConf is: " + jobConf.toString)
       AcidUtils.setValidWriteIdList(jobConf, validWriteIds)
     } else {
       val finalPaths = new ListBuffer[Path]()

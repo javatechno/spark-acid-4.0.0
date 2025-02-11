@@ -31,7 +31,7 @@ import com.qubole.shaded.hadoop.hive.metastore.utils.MetaStoreUtils.{getColumnNa
 import com.qubole.shaded.hadoop.hive.ql.exec.Utilities
 import com.qubole.shaded.hadoop.hive.ql.io.{AcidUtils, RecordIdentifier}
 import com.qubole.shaded.hadoop.hive.ql.metadata.{HiveUtils, Partition => HiveJarPartition, Table => HiveTable}
-import com.qubole.shaded.hadoop.hive.ql.metadata.Partition;
+import com.qubole.shaded.hadoop.hive.ql.metadata.Partition
 import com.qubole.shaded.hadoop.hive.ql.plan.TableDesc
 import com.qubole.shaded.hadoop.hive.serde2.{AbstractSerDe, Deserializer}
 import com.qubole.shaded.hadoop.hive.serde2.objectinspector.{ObjectInspectorConverters, StructObjectInspector}
@@ -41,6 +41,7 @@ import com.qubole.spark.hiveacid.hive.HiveAcidMetadata
 import com.qubole.spark.hiveacid.hive.HiveConverter
 import com.qubole.spark.hiveacid.reader.{Reader, ReaderOptions, ReaderPartition}
 import com.qubole.spark.hiveacid.rdd._
+import com.qubole.spark.hiveacid.reader.hive.HiveAcidReader.logDebug
 import com.qubole.spark.hiveacid.util._
 import org.apache.commons.codec.binary.Base64
 import org.apache.hadoop.conf.Configuration
@@ -171,13 +172,17 @@ extends CastSupport with SQLConfHelper with Reader with Logging {
     // Create local references to member variables, so that the entire `this` object won't be
     // serialized in the closure below.
     val localTableDesc = hiveAcidOptions.tableDesc
+    logDebug(s"HiveAcidReader makeRDDForTable. localTableDesc is:" + localTableDesc.toString)
     val tablePath = hiveTable.getPath
+    logDebug(s"HiveAcidReader makeRDDForTable. tablePath is:" + tablePath.toString)
+    logDebug(s"HiveAcidReader makeRDDForTable. hiveTable is:" + hiveTable.toString)
 
     val ifcName = hiveTable.getInputFormatClass.getName
     val ifc = Util.classForName(ifcName, loadShaded = true)
       .asInstanceOf[java.lang.Class[InputFormat[Writable, Writable]]]
     val hiveRDD = createRddForTable(localTableDesc, hiveTable.getSd.getCols,
       hiveTable.getParameters, tablePath.toString, ifc)
+    logDebug(s"HiveAcidReader makeRDDForTable. HiveRDD is:" + hiveRDD.toString())
     deserializeTableRdd(hiveRDD, deserializerClass)
   }
 
@@ -190,6 +195,7 @@ extends CastSupport with SQLConfHelper with Reader with Logging {
     */
   private def deserializeTableRdd(hiveRDD: RDD[(RecordIdentifier, Writable)],
                                   deserializerClass: Class[_ <: AbstractSerDe]) = {
+    logDebug(s"HiveAcidReader deserializeTableRdd. Deserialiser is: " + deserializerClass.getName)
     val localTableDesc = hiveAcidOptions.tableDesc
     val broadcastedHadoopConf = _broadcastedHadoopConf
     val attrsWithIndex = readerOptions.requiredAttributes.zipWithIndex
@@ -540,6 +546,7 @@ private[reader] object HiveAcidReader extends Hive3Inspectors with Logging {
     jobConf.set("schema.evolution.columns.types", schemaColTypes)
 
     // Set HiveACID related properties in jobConf
+    logDebug(s"Calling AcidUtils.isTransactionalTable(tableParameters). TableParameters are: " +tableParameters.toString)
     val isTransactionalTable = AcidUtils.isTransactionalTable(tableParameters)
     val acidProps = if (isTransactionalTable) {
       AcidUtils.getAcidOperationalProperties(tableParameters)
