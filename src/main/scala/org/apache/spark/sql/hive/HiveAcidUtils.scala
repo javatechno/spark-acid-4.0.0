@@ -29,6 +29,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.catalog.{CatalogStorageFormat, CatalogTablePartition, CatalogUtils}
 import org.apache.spark.sql.catalyst.expressions.{Attribute, AttributeReference, AttributeSeq, BoundReference, Expression, Nondeterministic}
 import org.apache.spark.sql.catalyst.trees.TreeNode
+import com.qubole.shaded.hadoop.hive.ql.metadata.Partition
 
 import scala.collection.Seq
 import scala.util.control.NonFatal

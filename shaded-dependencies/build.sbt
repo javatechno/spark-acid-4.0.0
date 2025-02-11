@@ -4,7 +4,11 @@ version := sys.props.getOrElse("package.version", "0.1.3")
 
 organization:= "com.qubole"
 
-scalaVersion := "2.13.11"
+scalaVersion := "2.13.8"
+javacOptions ++= Seq("-source", "8", "-target", "8")
+// javacOptions ++= Seq("-source", "11", "-target", "11")
+scalacOptions ++= Seq("-target:jvm-8")
+// scalacOptions ++= Seq("-target:jvm-11")
 scalacOptions ++= Seq(
 	"-Xlint",
 	"-Xfatal-warnings",
@@ -14,8 +18,8 @@ scalacOptions ++= Seq(
 	"-optimise"
 )
 
-javacOptions ++= Seq("-source", "8", "-target", "8")
-scalacOptions ++= Seq("-target:jvm-8")
+javacOptions ++= Seq("-source", "11", "-target", "11")
+scalacOptions ++= Seq("-target:jvm-11")
 
 //scalacOptions in (Compile, doc) ++= Seq(
 //	"-no-link-warnings" // Suppresses problems with Scaladoc @throws links
@@ -53,6 +57,12 @@ libraryDependencies ++= Seq(
 	// library version 0.9.1 conflict when runing Notebooks.
 	//	"org.apache.thrift" % "libfb303" % "0.9.3",
 	//	"org.apache.thrift" % "libthrift" % "0.9.3"
+        "commons-codec" % "commons-codec" % "1.15" intransitive(),
+		"org.apache.commons" % "commons-math3" % "3.6.1" intransitive(),
+  	    "org.apache.commons" % "commons-collections4" % "4.1" intransitive(),
+       "org.apache.httpcomponents" % "httpclient" % "4.5.13"  intransitive(),
+       "org.apache.httpcomponents" % "httpcore" % "4.4.13"  intransitive()
+
 )
 
 
@@ -65,7 +75,7 @@ assemblyShadeRules in assembly := Seq(
 	//		.exclude("META-INF/versions/21/com/fasterxml/jackson/core/io/doubleparser/FastIntegerMath.class")
 	//		.exclude("META-INF/versions/21/com/fasterxml/jackson/core/io/doubleparser/FastIntegerMath.class")
 	,
-	ShadeRule.zap("org.apache.hive.com.fasterxml.jackson.core.io.**").inAll,
+	// ShadeRule.zap("org.apache.hive.com.fasterxml.jackson.core.io.**").inAll,
 	ShadeRule.rename("org.apache.hadoop.hive.**" -> "com.qubole.shaded.hadoop.hive.@1").inAll,
 	ShadeRule.rename("org.apache.hive.**" -> "com.qubole.shaded.hive.@1").inAll,
 	//	ShadeRule.rename("org.apache.hadoop.hive.ql.io.**" -> "com.qubole.shaded.hadoop.hive.ql.io.@1").inAll,
@@ -96,6 +106,7 @@ assemblyShadeRules in assembly := Seq(
 	ShadeRule.rename("org.openx.data.**" -> "com.qubole.shaded.openx.data.@1").inAll,
 	ShadeRule.rename("au.com.bytecode.opencsv.**" -> "com.qubole.shaded.au.com.bytecode.opencsv.@1").inAll,
 	ShadeRule.rename("com.readytalk.metrics.**" -> "com.qubole.shaded.readytalk.metrics.@1").inAll
+	// ShadeRule.keep("org.apache.hadoop.hive.ql.io.orc.**").inAll
 )
 
 import sbtassembly.AssemblyPlugin.autoImport.{ShadeRule}

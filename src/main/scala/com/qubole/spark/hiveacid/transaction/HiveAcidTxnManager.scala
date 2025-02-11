@@ -35,7 +35,7 @@ import com.qubole.shaded.hadoop.hive.metastore.txn.TxnCommonUtils
 
 import scala.collection.JavaConverters._
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
-import scala.jdk.CollectionConverters.IterableHasAsJava
+
 import scala.language.implicitConversions
 
 /**

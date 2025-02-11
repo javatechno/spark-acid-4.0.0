@@ -26,7 +26,10 @@ organization := "com.qubole"
  */
 
 crossScalaVersions := Seq("2.13.8")
-
+//javacOptions ++= Seq("-source", "11", "-target", "11")
+javacOptions ++= Seq("-source", "8", "-target", "8")
+// scalacOptions ++= Seq("-target:jvm-11")
+scalacOptions ++= Seq("-target:jvm-8")
 scalaVersion := crossScalaVersions.value.head
 
 resolvers += Resolver.jcenterRepo
@@ -157,8 +160,8 @@ import sbt.Keys.libraryDependencies
 import sbt.Resolver
 
 import java.util.Properties
-import scala.xml.{Node => XmlNode, NodeSeq => XmlNodeSeq, _}
 import scala.xml.transform.{RewriteRule, RuleTransformer}
+import scala.xml.{Node => XmlNode, NodeSeq => XmlNodeSeq, _}
 
 pomPostProcess := { (node: XmlNode) =>
   new RuleTransformer(new RewriteRule {
@@ -280,7 +283,7 @@ pomExtra :=
 
 
 
-import ReleaseTransformations._
+import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
 // Add publishing to spark packages as another step.
 releaseProcess := Seq[ReleaseStep](
@@ -342,7 +345,7 @@ assemblyExcludedJars in assembly := {
 publishMavenStyle := true
 
 
-import ReleaseTransformations._
+import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 //
 //// Add publishing to spark packages as another step.
 releaseProcess := Seq[ReleaseStep](

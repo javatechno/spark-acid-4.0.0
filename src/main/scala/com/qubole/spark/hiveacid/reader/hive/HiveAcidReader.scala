@@ -31,6 +31,7 @@ import com.qubole.shaded.hadoop.hive.metastore.utils.MetaStoreUtils.{getColumnNa
 import com.qubole.shaded.hadoop.hive.ql.exec.Utilities
 import com.qubole.shaded.hadoop.hive.ql.io.{AcidUtils, RecordIdentifier}
 import com.qubole.shaded.hadoop.hive.ql.metadata.{HiveUtils, Partition => HiveJarPartition, Table => HiveTable}
+import com.qubole.shaded.hadoop.hive.ql.metadata.Partition;
 import com.qubole.shaded.hadoop.hive.ql.plan.TableDesc
 import com.qubole.shaded.hadoop.hive.serde2.{AbstractSerDe, Deserializer}
 import com.qubole.shaded.hadoop.hive.serde2.objectinspector.{ObjectInspectorConverters, StructObjectInspector}
