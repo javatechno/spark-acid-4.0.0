@@ -207,10 +207,13 @@ private[hiveacid] class HiveAcidRDD[K, V](sc: SparkContext,
   override def getPartitions: Array[Partition] = {
     val jobConf: JobConf = HiveAcidRDD.setInputPathToJobConf(Some(getJobConf), isFullAcidTable, validWriteIds,
       broadcastedConf, shouldCloneJobConf, initLocalJobConfFuncOpt)
-
+    logDebug(s"HiveAcidRDD getPartitions, validWriteIds are: " + validWriteIds.writeToString())
+    logDebug(s"HiveAcidRDD getPartitions, JobConf is: " + jobConf.toString)
+    logDebug(s"HiveAcidRDD getPartitions. [KeyClass,ValueClass]" + keyClass.getCanonicalName +" "+ valueClass.getCanonicalName)
     // add the credentials here as this can be called before SparkContext initialized
 //    SparkHadoopUtil.get.addCredentials(jobConf)
     val paths = FileInputFormat.getInputPaths(jobConf)
+    logDebug(s"HiveAcidRDD getPartitions, Paths:" + paths.toString)
     val partitions = HiveAcidPartitionComputer.getFromSplitsCache(paths, validWriteIds)
     if (partitions.isDefined) {
       partitions.get.asInstanceOf[Array[Partition]]

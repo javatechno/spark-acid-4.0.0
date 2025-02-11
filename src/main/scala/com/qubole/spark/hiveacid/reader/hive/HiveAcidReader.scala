@@ -384,6 +384,17 @@ extends CastSupport with SQLConfHelper with Reader with Logging {
     val initializeJobConfFunc = HiveAcidReader.initializeLocalJobConfFunc(
       path, tableDesc, tableParameters,
       colNames, colTypes) _
+    logDebug(s"HiveAcidRDD init: " +
+      s"sparkContext=${sparkSession.sparkContext}, " +
+      s"validWriteIds=${validWriteIds.writeToString()}, " +
+      s"isFullAcidTable=${hiveAcidOptions.isFullAcidTable.toString}, " +
+      s"broadcastedHadoopConf=${_broadcastedHadoopConf.id}, " +
+      s"initializeJobConfFunc=${initializeJobConfFunc.getClass.getName}, " +
+      s"inputFormatClass=${inputFormatClass.getName}, " +
+      s"keyClass=${classOf[Writable].getName}, " +
+      s"valueClass=${classOf[Writable].getName}, " +
+      s"minSplitsPerRDD=${_minSplitsPerRDD.toString}"
+    )
     val rdd = new HiveAcidRDD(
       sparkSession.sparkContext,
       validWriteIds,
