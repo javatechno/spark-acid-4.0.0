@@ -21,6 +21,7 @@ package org.apache.spark.sql.hive
 
 import scala.collection.JavaConverters._
 import com.qubole.spark.hiveacid.hive.HiveAcidMetadata
+import com.qubole.shaded.hadoop.hive.ql.metadata.Partition
 import org.apache.spark.SparkException
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.AnalysisException
@@ -74,7 +75,7 @@ object HiveAcidUtils {
     }
   }
 
-  def convertToCatalogTablePartition(hp: org.apache.hadoop.hive.ql.metadata.Partition): CatalogTablePartition = {
+  def convertToCatalogTablePartition(hp: com.qubole.shaded.hadoop.hive.ql.metadata.Partition): CatalogTablePartition = {
     val apiPartition = hp.getTPartition
     val properties: Map[String, String] = if (hp.getParameters != null) {
       hp.getParameters.asScala.toMap

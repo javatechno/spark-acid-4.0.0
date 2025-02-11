@@ -57,6 +57,7 @@ libraryDependencies ++= Seq(
 
 
 assemblyShadeRules in assembly := Seq(
+        ShadeRule.zap("org.apache.hadoop.hive.ql.parse.HiveParser").inAll,
 	ShadeRule.rename("org.apache.hadoop.hive.ql.**" -> "com.qubole.shaded.hadoop.hive.ql.@1")
 		.inAll
 	//		.exclude("META-INF/versions/17/com/fasterxml/jackson/core/io/doubleparser/FastDoubleSwar.class")

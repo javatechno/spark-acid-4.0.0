@@ -186,7 +186,7 @@ excludeDependencies ++= Seq(
 //  "org.apache.orc" % "orc-core",
 //  "org.apache.orc" % "orc-mapreduce",
 
-  "org.slf4j" % "slf4j-api"
+//  "org.slf4j" % "slf4j-api"
 )
 
 // do not run test at assembly
