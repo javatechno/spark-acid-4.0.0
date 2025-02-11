@@ -196,6 +196,8 @@ private[hiveacid] class HiveAcidTxnManager(sparkSession: SparkSession) extends L
   private def getValidWriteIds(txnIdOpt: Option[Long],
                                validTxnList: ValidTxnList,
                                fullyQualifiedTableName: String): ValidWriteIdList = synchronized {
+    logDebug(s"HiveAcidTxnManager getValidWriteIds hive conf: "+ hiveConf.toString)
+    logDebug(s"HiveAcidTxnManager getValidWriteIds hive conf: "+ hiveConf.toString)
     logDebug(s"HiveAcidTxnManager getValidWriteIds: "+validTxnList.writeToString()+" validTxnList method parameter")
     logDebug(s"HiveAcidTxnManager getValidWriteIds: "+fullyQualifiedTableName+" fullyQualifiedTableName method parameter")
     val txnId = txnIdOpt match {
