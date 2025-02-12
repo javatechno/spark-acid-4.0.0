@@ -61,6 +61,7 @@ class HiveAcidTable(val sparkSession: SparkSession,
       parameters
     }
     sparkSession.conf.set("spark.sql.hive.convertMetastoreOrc",value = false)
+    sparkSession.conf.set("spark.sql.hive.convertMetastoreParquet",value = false)
     sparkSession.read.format(HiveAcidDataSource.NAME)
       .options(options)
       .load()
@@ -221,6 +222,7 @@ object HiveAcidTable {
                        parameters: Map[String, String] = Map()
                       ): HiveAcidTable = {
     sparkSession.conf.set("spark.sql.hive.convertMetastoreOrc",value = false)
+    sparkSession.conf.set("spark.sql.hive.convertMetastoreParquet",value = false)
     val hiveAcidMetadata: HiveAcidMetadata =
       HiveAcidMetadata.fromSparkSession(sparkSession, fullyQualifiedTableName)
     new HiveAcidTable(sparkSession, hiveAcidMetadata, parameters)
