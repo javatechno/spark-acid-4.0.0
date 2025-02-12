@@ -127,7 +127,18 @@ object HiveAcidTxn extends Logging {
   }
 
   private[hiveacid] def getValidWriteIds(txn: HiveAcidTxn, hiveAcidMetadata: HiveAcidMetadata) = {
-    logDebug("HiveAcidTxn getValidWriteIds: " + hiveAcidMetadata.toString)
+    logDebug(s"HiveAcidTxn getValidWriteIdList. HiveAcidMetadata content: " +
+      s"dbName=${hiveAcidMetadata.dbName}, " +
+      s"isFullAcidTable=${hiveAcidMetadata.isFullAcidTable}, " +
+      s"hTable=${hiveAcidMetadata.hTable}, " +
+      s"isPartitioned=${hiveAcidMetadata.isPartitioned}, " +
+      s"partitionSchema.fields=${hiveAcidMetadata.partitionSchema.fields.toString}, " +
+      s"dataSchema.fields=${hiveAcidMetadata.dataSchema.fields.toString}, " +
+      s"isFullAcidTable=${hiveAcidMetadata.isFullAcidTable}, " +
+      s"fullyQualifiedName=${hiveAcidMetadata.fullyQualifiedName}, " +
+      s"rootPath=${hiveAcidMetadata.rootPath.toString}, " +
+      s"tableDesc=${hiveAcidMetadata.tableDesc.toString}, "
+    )
     val validWriteIdList = if (txn.txnId == -1) {
       logDebug("Called write id request before txn start: ")
       throw HiveAcidErrors.tableWriteIdRequestedBeforeTxnStart(hiveAcidMetadata.fullyQualifiedName)
@@ -135,6 +146,7 @@ object HiveAcidTxn extends Logging {
       logDebug("Called write ids from txn manager. validTxnList is: " + txn.validTxnList.writeToString())
       txnManager.getValidWriteIds(txn.txnId, txn.validTxnList, hiveAcidMetadata.fullyQualifiedName)
     }
+    logDebug("Returned write ids from txnManager for table: "+ hiveAcidMetadata.fullyQualifiedName + " . validTxnList is: " + validWriteIdList.writeToString())
     validWriteIdList
   }
 

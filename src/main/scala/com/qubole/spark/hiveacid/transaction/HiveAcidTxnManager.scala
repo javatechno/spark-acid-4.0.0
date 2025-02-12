@@ -205,13 +205,16 @@ private[hiveacid] class HiveAcidTxnManager(sparkSession: SparkSession) extends L
       case None => -1L
     }
     logDebug(s"HiveAcidTxnManager getValidWriteIds: "+txnId+" txnId method parameter")
+    val tableValidWriteIdForTable = List(client.getValidWriteIds(fullyQualifiedTableName)).asJava
     val tableValidWriteIds = client.getValidWriteIds(List(fullyQualifiedTableName).asJava,
       validTxnList.writeToString())
-    logDebug(s"HiveAcidTxnManager getValidWriteIds: "+tableValidWriteIds.toString+" tableValidWriteIds received by client.getValidWriteIds(List(fullyQualifiedTableName))")
+    logDebug(s"HiveAcidTxnManager getValidWriteIds List<TableValidWriteIds> client.getValidWriteIds(fullyQualifiedTableName, validTxnList) tableValidWriteIds : "+ tableValidWriteIds.toString)
+    logDebug(s"HiveAcidTxnManager getValidWriteIds ValidWriteIdList from client.getValidWriteIds(fullyQualifiedTableName) tableValidWriteIdForTable : "+tableValidWriteIdForTable.toString)
+
     val txnWriteIds: ValidTxnWriteIdList = TxnCommonUtils.createValidTxnWriteIdList(txnId,
       tableValidWriteIds)
-    logDebug(s"HiveAcidTxnManager getValidWriteIds: "+txnWriteIds.toString+" txnWriteIds received by  TxnCommonUtils.createValidTxnWriteIdList(txnId, tableValidWriteIds)")
-    logDebug(s"HiveAcidTxnManager getValidWriteIds: "+txnWriteIds.getTableValidWriteIdList(fullyQualifiedTableName).toString+" txnWriteIds.getTableValidWriteIdList ")
+    logDebug(s"HiveAcidTxnManager getValidWriteIds List<TableValidWriteIds> -> ValidWriteIdList tableValidWriteIds: "+txnWriteIds.getTableValidWriteIdList(fullyQualifiedTableName).toString+" txnWriteIds.getTableValidWriteIdList ")
+    logDebug(s"HiveAcidTxnManager getValidWriteIds ValidTxnWriteIdList: " + txnWriteIds.toString)
     txnWriteIds.getTableValidWriteIdList(fullyQualifiedTableName)
   }
 
