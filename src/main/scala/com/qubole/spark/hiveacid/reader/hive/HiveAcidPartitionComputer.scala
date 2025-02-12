@@ -28,7 +28,6 @@ import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.Writable
 import org.apache.hadoop.mapred.{FileInputFormat, InputFormat, InvalidInputException, JobConf}
 import org.apache.hadoop.util.ReflectionUtils
-import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
 
@@ -42,6 +41,8 @@ private[hiveacid] case class HiveAcidPartitionComputer(ignoreEmptySplits: Boolea
     // add the credentials here as this can be called before SparkContext initialized
 //    SparkHadoopUtil.get.addCredentials(jobConf)
     try {
+      logWarning(s"getPartitions jobconf: "+ jobConf.toString)
+      logWarning(s"getPartitions jobconf txns: "+ jobConf.get("VALID_TXNS_KEY"))
       val allInputSplits = inputFormat.getSplits(jobConf, minPartitions)
       val inputSplits = if (ignoreEmptySplits) {
         allInputSplits.filter(_.getLength > 0)
@@ -76,6 +77,8 @@ private[hiveacid] case class HiveAcidPartitionComputer(ignoreEmptySplits: Boolea
           broadcastedConf,
           shouldCloneJobConf,
           initLocalJobConfFuncOpt)
+        logWarning(s"computeHiveSplitsAndCache jobconf: "+ jobConf.toString)
+        logWarning(s"computeHiveSplitsAndCache jobconf txns: "+ jobConf.get("VALID_TXNS_KEY"))
         val partitions = this.getPartitions[Writable, Writable](id, jobConf, getInputFormat(jobConf, ifcName), minPartitions)
         (partitions, FileInputFormat.getInputPaths(jobConf), validWriteIdList)
     }.collect()

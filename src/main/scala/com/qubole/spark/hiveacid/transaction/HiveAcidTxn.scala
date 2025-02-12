@@ -21,7 +21,7 @@ import com.qubole.shaded.hadoop.hive.common.{ValidTxnList, ValidWriteIdList}
 
 import java.util.concurrent.atomic.AtomicBoolean
 import com.qubole.spark.hiveacid.{HiveAcidErrors, HiveAcidOperation, SparkAcidConf}
-import com.qubole.spark.hiveacid.hive.HiveAcidMetadata
+import com.qubole.spark.hiveacid.hive.{HiveAcidMetadata, HiveConverter}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
 
@@ -142,6 +142,8 @@ object HiveAcidTxn extends Logging {
   var txnManager: HiveAcidTxnManager = _
   private def setUpTxnManager(sparkSession: SparkSession): Unit = synchronized {
     if (txnManager == null) {
+      logDebug(s"Initializing HiveAcidTxnManager from session sparkContext: " + sparkSession.sparkContext)
+      logDebug(s"Initializing HiveAcidTxnManager from session hiveConf: " + HiveConverter.getHiveConf(sparkSession.sparkContext).toString)
       txnManager = new HiveAcidTxnManager(sparkSession)
     }
   }

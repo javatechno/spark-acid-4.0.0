@@ -64,9 +64,13 @@ private[hiveacid] object HiveConverter extends Logging {
   }
   def getHiveConf(sparkContext: SparkContext): HiveConf = {
     val hiveConf = new HiveConf()
-
+    logDebug("getHiveConf method called from metastore. Below are all conf keys:")
     (sparkContext.hadoopConfiguration.iterator().asScala.map(kv => kv.getKey -> kv.getValue)
       ++ sparkContext.getConf.getAll.toMap).foreach { case (k, v) =>
+      logDebug(
+        s"""
+           |KEY $k : VALUE $v
+           |""".stripMargin)
       logDebug(
         s"""
            |Applying Hadoop/Hive/Spark and extra properties to Hive Conf:
