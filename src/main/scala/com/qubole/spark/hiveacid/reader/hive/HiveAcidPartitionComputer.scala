@@ -32,6 +32,7 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
 
 import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
+import scala.jdk.CollectionConverters.IteratorHasAsScala
 
 private[hiveacid] case class HiveAcidPartitionComputer(ignoreEmptySplits: Boolean,
                                                   ignoreMissingFiles: Boolean) extends Logging {
@@ -41,8 +42,14 @@ private[hiveacid] case class HiveAcidPartitionComputer(ignoreEmptySplits: Boolea
     // add the credentials here as this can be called before SparkContext initialized
 //    SparkHadoopUtil.get.addCredentials(jobConf)
     try {
-      logWarning(s"getPartitions jobconf: "+ jobConf.toString)
-      logWarning(s"getPartitions jobconf txns: "+ jobConf.get("VALID_TXNS_KEY"))
+      jobConf.set("spark.sql.hive.convertMetastoreOrc", "false")
+      val configString: String = jobConf.iterator().asScala
+        .map(entry => s"${entry.getKey} = ${entry.getValue}")
+        .mkString("\n")
+
+      // Log the concatenated configuration string using logDebug
+      logDebug(s"Hive JobConf properties:\n$configString")
+      logWarning(s"getPartitions jobconf id: "+ id)
       val allInputSplits = inputFormat.getSplits(jobConf, minPartitions)
       val inputSplits = if (ignoreEmptySplits) {
         allInputSplits.filter(_.getLength > 0)
@@ -67,6 +74,7 @@ private[hiveacid] case class HiveAcidPartitionComputer(ignoreEmptySplits: Boolea
   def computeHiveSplitsAndCache(splitRDD: RDD[HiveSplitInfo]): Unit = {
     val start = System.nanoTime()
     logInfo("Spawning job to compute partitions for ACID table RDD")
+
     val splits = splitRDD.map {
       case HiveSplitInfo(id, broadcastedConf,
       validWriteIdList, minPartitions, ifcName, isFullAcidTable, shouldCloneJobConf, initLocalJobConfFuncOpt) =>

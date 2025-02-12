@@ -144,6 +144,7 @@ object HiveAcidTxn extends Logging {
       throw HiveAcidErrors.tableWriteIdRequestedBeforeTxnStart(hiveAcidMetadata.fullyQualifiedName)
     } else {
       logDebug("Called write ids from txn manager. validTxnList is: " + txn.validTxnList.writeToString())
+      logDebug("Received ids from txn manager. validTxnList is: " + txnManager.getValidWriteIds(txn.txnId, txn.validTxnList, hiveAcidMetadata.fullyQualifiedName).writeToString())
       txnManager.getValidWriteIds(txn.txnId, txn.validTxnList, hiveAcidMetadata.fullyQualifiedName)
     }
     logDebug("Returned write ids from txnManager for table: "+ hiveAcidMetadata.fullyQualifiedName + " . validTxnList is: " + validWriteIdList.writeToString())

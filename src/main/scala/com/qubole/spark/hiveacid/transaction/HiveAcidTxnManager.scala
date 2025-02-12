@@ -200,6 +200,7 @@ private[hiveacid] class HiveAcidTxnManager(sparkSession: SparkSession) extends L
     logDebug(s"HiveAcidTxnManager getValidWriteIds hive conf: "+ hiveConf.toString)
     logDebug(s"HiveAcidTxnManager getValidWriteIds: "+validTxnList.writeToString()+" validTxnList method parameter")
     logDebug(s"HiveAcidTxnManager getValidWriteIds: "+fullyQualifiedTableName+" fullyQualifiedTableName method parameter")
+
     val txnId = txnIdOpt match {
       case Some(id) => id
       case None => -1L
@@ -209,6 +210,7 @@ private[hiveacid] class HiveAcidTxnManager(sparkSession: SparkSession) extends L
     val tableValidWriteIds = client.getValidWriteIds(List(fullyQualifiedTableName).asJava,
       validTxnList.writeToString())
     logDebug(s"HiveAcidTxnManager getValidWriteIds List<TableValidWriteIds> client.getValidWriteIds(fullyQualifiedTableName, validTxnList) tableValidWriteIds : "+ tableValidWriteIds.toString)
+    logDebug(s"HiveAcidTxnManager getValidWriteIds List<TableValidWriteIds> client.getValidWriteIds(fullyQualifiedTableName, validTxnList) tableValidWriteIds : "+ tableValidWriteIds.)
     logDebug(s"HiveAcidTxnManager getValidWriteIds ValidWriteIdList from client.getValidWriteIds(fullyQualifiedTableName) tableValidWriteIdForTable : "+tableValidWriteIdForTable.toString)
 
     val txnWriteIds: ValidTxnWriteIdList = TxnCommonUtils.createValidTxnWriteIdList(txnId,

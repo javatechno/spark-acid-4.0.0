@@ -112,7 +112,15 @@ private[hiveacid] class TableReader(sparkSession: SparkSession,
     //val curSnapshot = HiveAcidTxn.createSnapshot(curTxn, hiveAcidMetadata)
     logDebug(s"TableReader. Calling for validWriteIds from HiveAcidTxn. Current transaction id is: " + curTxn.txnId + "Metadata is: " + hiveAcidMetadata.toString)
     val validWriteIds = HiveAcidTxn.getValidWriteIds(curTxn, hiveAcidMetadata)
+    logDebug(s"TableReader.Received validWriteIds from HiveAcidTxn : " + validWriteIds.writeToString)
 
+    logDebug(s"TableReader. Initialising HiveAcidReader: " + validWriteIds.writeToString)
+    logDebug(s"TableReader. Initializing HiveAcidReader:" +
+      s"sparkContext=${sparkSession.sparkContext.toString}, " +
+      s"readerOptions=${readerOptions.toString}, " +
+      s"hiveAcidReaderOptions=${hiveAcidReaderOptions.toString}, " +
+      s"validWriteIds=${validWriteIds.writeToString()}, "
+    )
     val reader = new HiveAcidReader(
       sparkSession,
       readerOptions,
