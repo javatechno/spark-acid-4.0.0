@@ -20,8 +20,8 @@
 package com.qubole.spark.hiveacid.datasource
 
 import com.qubole.spark.hiveacid.datasource.HiveAcidDataSource.getFullyQualifiedTableName
-import com.qubole.spark.hiveacid.{HiveAcidErrors, HiveAcidTable}
 import com.qubole.spark.hiveacid.streaming.HiveAcidSink
+import com.qubole.spark.hiveacid.{HiveAcidErrors, HiveAcidTable}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql._
 import org.apache.spark.sql.execution.streaming.Sink
@@ -41,6 +41,7 @@ class HiveAcidDataSource
   // returns relation for passed in table name
   override def createRelation(sqlContext: SQLContext,
                               parameters: Map[String, String]): BaseRelation = {
+    sqlContext.sparkSession.conf.set("spark.sql.hive.convertMetastoreOrc",value = false)
     HiveAcidRelation(sqlContext.sparkSession, getFullyQualifiedTableName(parameters), parameters)
   }
 
@@ -49,7 +50,7 @@ class HiveAcidDataSource
                               mode: SaveMode,
                               parameters: Map[String, String],
                               df: DataFrame): BaseRelation = {
-
+    sqlContext.sparkSession.conf.set("spark.sql.hive.convertMetastoreOrc",value = false)
     val hiveAcidTable: HiveAcidTable = HiveAcidTable.fromSparkSession(
       sqlContext.sparkSession,
       getFullyQualifiedTableName(parameters),
@@ -77,7 +78,7 @@ class HiveAcidDataSource
                           outputMode: OutputMode): Sink = {
 
     tableSinkAssertions(partitionColumns, outputMode)
-
+    sqlContext.sparkSession.conf.set("spark.sql.hive.convertMetastoreOrc",value = false)
     new HiveAcidSink(sqlContext.sparkSession, parameters)
   }
 

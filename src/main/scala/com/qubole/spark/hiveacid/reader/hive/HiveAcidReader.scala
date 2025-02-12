@@ -395,6 +395,7 @@ extends CastSupport with SQLConfHelper with Reader with Logging {
       s"valueClass=${classOf[Writable].getName}, " +
       s"minSplitsPerRDD=${_minSplitsPerRDD.toString}"
     )
+    sparkSession.conf.set("spark.sql.hive.convertMetastoreOrc",value = false)
     val rdd = new HiveAcidRDD(
       sparkSession.sparkContext,
       validWriteIds,
