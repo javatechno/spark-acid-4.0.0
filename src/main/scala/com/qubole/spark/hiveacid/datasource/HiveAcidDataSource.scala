@@ -41,8 +41,6 @@ class HiveAcidDataSource
   // returns relation for passed in table name
   override def createRelation(sqlContext: SQLContext,
                               parameters: Map[String, String]): BaseRelation = {
-    sqlContext.sparkSession.conf.set("spark.sql.hive.convertMetastoreOrc",value = false)
-    sqlContext.sparkSession.conf.set("spark.sql.hive.convertMetastoreParquet",value = false)
     HiveAcidRelation(sqlContext.sparkSession, getFullyQualifiedTableName(parameters), parameters)
   }
 
@@ -51,8 +49,6 @@ class HiveAcidDataSource
                               mode: SaveMode,
                               parameters: Map[String, String],
                               df: DataFrame): BaseRelation = {
-    sqlContext.sparkSession.conf.set("spark.sql.hive.convertMetastoreOrc",value = false)
-    sqlContext.sparkSession.conf.set("spark.sql.hive.convertMetastoreParquet",value = false)
     val hiveAcidTable: HiveAcidTable = HiveAcidTable.fromSparkSession(
       sqlContext.sparkSession,
       getFullyQualifiedTableName(parameters),
@@ -80,8 +76,6 @@ class HiveAcidDataSource
                           outputMode: OutputMode): Sink = {
 
     tableSinkAssertions(partitionColumns, outputMode)
-    sqlContext.sparkSession.conf.set("spark.sql.hive.convertMetastoreOrc",value = false)
-    sqlContext.sparkSession.conf.set("spark.sql.hive.convertMetastoreParquet",value = false)
     new HiveAcidSink(sqlContext.sparkSession, parameters)
   }
 

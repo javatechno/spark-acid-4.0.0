@@ -42,7 +42,6 @@ private[hiveacid] case class HiveAcidPartitionComputer(ignoreEmptySplits: Boolea
     // add the credentials here as this can be called before SparkContext initialized
 //    SparkHadoopUtil.get.addCredentials(jobConf)
     try {
-      jobConf.set("spark.sql.hive.convertMetastoreOrc", "false")
       val configString: String = jobConf.iterator().asScala
         .map(entry => s"${entry.getKey} = ${entry.getValue}")
         .mkString("\n")

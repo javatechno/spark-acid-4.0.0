@@ -44,8 +44,6 @@ private[hiveacid] class TableReader(sparkSession: SparkSession,
   def getRdd(requiredColumns: Array[String],
              filters: Array[Filter],
              readConf: SparkAcidConf): RDD[Row] = {
-    sparkSession.conf.set("spark.sql.hive.convertMetastoreOrc",value = false)
-    sparkSession.conf.set("spark.sql.hive.convertMetastoreParquet",value = false)
     val rowIdColumnSet = HiveAcidMetadata.rowIdSchema.fields.map(_.name).toSet
     val requiredColumnsWithoutRowId = requiredColumns.filterNot(rowIdColumnSet.contains)
     val partitionColumnNames = hiveAcidMetadata.partitionSchema.fields.map(_.name)

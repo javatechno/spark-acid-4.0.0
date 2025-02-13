@@ -397,8 +397,6 @@ extends CastSupport with SQLConfHelper with Reader with Logging {
       s"valueClass=${classOf[Writable].getName}, " +
       s"minSplitsPerRDD=${_minSplitsPerRDD.toString}"
     )
-    sparkSession.conf.set("spark.sql.hive.convertMetastoreOrc",value = false)
-    sparkSession.conf.set("spark.sql.hive.convertMetastoreParquet",value = false)
     val validTxnList = sparkSession.conf.get("hive.txn.valid.txns")
 //    sparkSession.sparkContext.getConf.set("hive.txn.valid.txns",validTxnList)
 
