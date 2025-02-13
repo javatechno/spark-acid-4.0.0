@@ -49,7 +49,7 @@ private[hiveacid] case class HiveAcidPartitionComputer(ignoreEmptySplits: Boolea
 
       // Log the concatenated configuration string using logDebug
       logDebug(s"Hive JobConf properties:\n$configString")
-      logWarning(s"getPartitions jobconf id: "+ id)
+      logWarning(s"HiveAcidPartitionComputer getPartitions jobconf id: "+ id)
       val allInputSplits = inputFormat.getSplits(jobConf, minPartitions)
       val inputSplits = if (ignoreEmptySplits) {
         allInputSplits.filter(_.getLength > 0)

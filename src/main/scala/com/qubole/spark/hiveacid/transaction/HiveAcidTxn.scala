@@ -151,6 +151,15 @@ object HiveAcidTxn extends Logging {
     validWriteIdList
   }
 
+  private[hiveacid] def geTxnIdList(txn: HiveAcidTxn, hiveAcidMetadata: HiveAcidMetadata) = {
+    logDebug(s"HiveAcidTxn geTxnIdList. HiveAcidMetadata content: " +
+      s"dbName=${hiveAcidMetadata.dbName}, " +
+      s"txnList=${txn.validTxnList}"
+    )
+    txn.validTxnList
+  }
+
+
   // Txn manager is connection to HMS. Use single instance of it
   var txnManager: HiveAcidTxnManager = _
   private def setUpTxnManager(sparkSession: SparkSession): Unit = synchronized {

@@ -210,7 +210,6 @@ private[hiveacid] class HiveAcidTxnManager(sparkSession: SparkSession) extends L
     val tableValidWriteIds = client.getValidWriteIds(List(fullyQualifiedTableName).asJava,
       validTxnList.writeToString())
     logDebug(s"HiveAcidTxnManager getValidWriteIds List<TableValidWriteIds> client.getValidWriteIds(fullyQualifiedTableName, validTxnList) tableValidWriteIds : "+ tableValidWriteIds.toString)
-    logDebug(s"HiveAcidTxnManager getValidWriteIds List<TableValidWriteIds> client.getValidWriteIds(fullyQualifiedTableName, validTxnList) tableValidWriteIds : "+ tableValidWriteIds.)
     logDebug(s"HiveAcidTxnManager getValidWriteIds ValidWriteIdList from client.getValidWriteIds(fullyQualifiedTableName) tableValidWriteIdForTable : "+tableValidWriteIdForTable.toString)
 
     val txnWriteIds: ValidTxnWriteIdList = TxnCommonUtils.createValidTxnWriteIdList(txnId,

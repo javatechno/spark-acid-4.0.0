@@ -46,6 +46,7 @@ import com.qubole.spark.hiveacid.util._
 import org.apache.commons.codec.binary.Base64
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{Path, PathFilter}
+import org.apache.hadoop.hive.common.ValidTxnList
 import org.apache.hadoop.io.Writable
 import org.apache.hadoop.mapred.{FileInputFormat, InputFormat, JobConf}
 import org.apache.spark.broadcast.Broadcast
@@ -79,7 +80,8 @@ import scala.jdk.CollectionConverters._
 private[reader] class HiveAcidReader(sparkSession: SparkSession,
                                      readerOptions: ReaderOptions,
                                      hiveAcidOptions: HiveAcidReaderOptions,
-                                     validWriteIds: ValidWriteIdList)
+                                     validWriteIds: ValidWriteIdList,
+                                     )
 
 extends CastSupport with SQLConfHelper with Reader with Logging {
 
@@ -397,6 +399,13 @@ extends CastSupport with SQLConfHelper with Reader with Logging {
     )
     sparkSession.conf.set("spark.sql.hive.convertMetastoreOrc",value = false)
     sparkSession.conf.set("spark.sql.hive.convertMetastoreParquet",value = false)
+    val validTxnList = sparkSession.conf.get("hive.txn.valid.txns")
+    sparkSession.sparkContext.getConf.set("hive.txn.valid.txns",validTxnList)
+
+    val configString: String = sparkSession.sparkContext.getConf.toDebugString
+    logDebug(s"HiveAcidRDD init: setting sparkSession.sparkContext key hive.txn.valid.txns. Result is:" +
+      s"sparkContext=$configString "
+    )
     val rdd = new HiveAcidRDD(
       sparkSession.sparkContext,
       validWriteIds,

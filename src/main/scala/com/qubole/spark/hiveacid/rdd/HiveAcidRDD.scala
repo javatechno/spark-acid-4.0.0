@@ -44,6 +44,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.{Date, Locale}
 import scala.collection.JavaConverters.{bufferAsJavaListConverter, seqAsJavaListConverter}
 import scala.collection.mutable.ListBuffer
+import scala.jdk.CollectionConverters.IteratorHasAsScala
 import scala.reflect.ClassTag
 
 // This file has lot of borrowed code from org.apache.spark.rdd.HadoopRdd
@@ -205,10 +206,14 @@ private[hiveacid] class HiveAcidRDD[K, V](sc: SparkContext,
   }
 
   override def getPartitions: Array[Partition] = {
+    logDebug(s"HiveAcidRDD getPartitions, getValidTxnIds from key hive.txn.valid.txns from sparkContext: " + sc.getConf.get("hive.txn.valid.txns"))
     val jobConf: JobConf = HiveAcidRDD.setInputPathToJobConf(Some(getJobConf), isFullAcidTable, validWriteIds,
       broadcastedConf, shouldCloneJobConf, initLocalJobConfFuncOpt)
+    jobConf.set("hive.txn.valid.txns",sc.getConf.get("hive.txn.valid.txns"))
     logDebug(s"HiveAcidRDD getPartitions, validWriteIds are: " + validWriteIds.writeToString())
-    logDebug(s"HiveAcidRDD getPartitions, JobConf is: " + jobConf.toString)
+    logDebug(s"HiveAcidRDD getPartitions, JobConf is. Must contain hive.txn.valid.txns: " + jobConf.iterator().asScala
+      .map(entry => s"${entry.getKey} = ${entry.getValue}")
+      .mkString("\n"))
     logDebug(s"HiveAcidRDD getPartitions. [KeyClass,ValueClass]" + keyClass.getCanonicalName +" "+ valueClass.getCanonicalName)
     // add the credentials here as this can be called before SparkContext initialized
 //    SparkHadoopUtil.get.addCredentials(jobConf)
