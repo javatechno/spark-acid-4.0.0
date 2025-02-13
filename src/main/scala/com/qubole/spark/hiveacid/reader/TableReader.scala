@@ -127,10 +127,6 @@ private[hiveacid] class TableReader(sparkSession: SparkSession,
     )
     sparkSession.conf.set("hive.txn.valid.txns", validTxnList.writeToString())
     sparkSession.sessionState.conf.setConfString("hive.txn.valid.txns", validTxnList.writeToString())
-    sparkSession.sparkContext.getConf.set("hive.txn.valid.txns",validTxnList.writeToString())
-    logDebug(s"TableReader. Initializing HiveAcidReader set sparkSession.sparkContext.getConf:" +
-      s"hive.txn.valid.txns -> =${sparkSession.sparkContext.getConf.get("hive.txn.valid.txns")}"
-    )
     val reader = new HiveAcidReader(
       sparkSession,
       readerOptions,

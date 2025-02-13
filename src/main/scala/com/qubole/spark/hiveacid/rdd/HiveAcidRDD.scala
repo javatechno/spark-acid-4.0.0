@@ -20,7 +20,7 @@
 package com.qubole.spark.hiveacid.rdd
 
 
-import com.qubole.shaded.hadoop.hive.common.ValidWriteIdList
+import com.qubole.shaded.hadoop.hive.common.{ValidTxnList, ValidWriteIdList}
 import com.qubole.shaded.hadoop.hive.ql.io.{AcidInputFormat, AcidUtils, HiveInputFormat, RecordIdentifier}
 import com.qubole.spark.hiveacid.rdd.HiveAcidRDD.HiveAcidPartitionsWithSplitRDD
 import com.qubole.spark.hiveacid.reader.hive.HiveAcidPartitionComputer
@@ -89,19 +89,21 @@ class HiveAcidPartition(rddId: Int, override val index: Int, s: InputSplit)
  * `org.apache.spark.SparkContext.HiveAcidRDD()`
  */
 private[hiveacid] class HiveAcidRDD[K, V](sc: SparkContext,
-                                     @transient val validWriteIds: ValidWriteIdList,
-                                     @transient val isFullAcidTable: Boolean,
-                                     broadcastedConf: Broadcast[SerializableConfiguration],
-                                     initLocalJobConfFuncOpt: Option[JobConf => Unit],
-                                     inputFormatClass: Class[_ <: InputFormat[K, V]],
-                                     keyClass: Class[K],
-                                     valueClass: Class[V],
-                                     minPartitions: Int)
+                                          @transient val validWriteIds: ValidWriteIdList,
+                                          @transient val validTxnList: String,
+                                          @transient val isFullAcidTable: Boolean,
+                                          broadcastedConf: Broadcast[SerializableConfiguration],
+                                          initLocalJobConfFuncOpt: Option[JobConf => Unit],
+                                          inputFormatClass: Class[_ <: InputFormat[K, V]],
+                                          keyClass: Class[K],
+                                          valueClass: Class[V],
+                                          minPartitions: Int)
   extends RDD[(RecordIdentifier, V)](sc, Nil) with Logging {
 
   def this(
             sc: SparkContext,
             @transient validWriteIds: ValidWriteIdList,
+            @transient validTxnList: String,
             @transient isFullAcidTable: Boolean,
             conf: JobConf,
             inputFormatClass: Class[_ <: InputFormat[K, V]],
@@ -111,6 +113,7 @@ private[hiveacid] class HiveAcidRDD[K, V](sc: SparkContext,
     this(
       sc,
       validWriteIds,
+      validTxnList,
       isFullAcidTable,
       sc.broadcast(new SerializableConfiguration(conf))
         .asInstanceOf[Broadcast[SerializableConfiguration]],
@@ -206,12 +209,11 @@ private[hiveacid] class HiveAcidRDD[K, V](sc: SparkContext,
   }
 
   override def getPartitions: Array[Partition] = {
-    logDebug(s"HiveAcidRDD getPartitions, getValidTxnIds from key hive.txn.valid.txns from sparkContext: " + sc.getConf.get("hive.txn.valid.txns"))
     val jobConf: JobConf = HiveAcidRDD.setInputPathToJobConf(Some(getJobConf), isFullAcidTable, validWriteIds,
       broadcastedConf, shouldCloneJobConf, initLocalJobConfFuncOpt)
-    jobConf.set("hive.txn.valid.txns",sc.getConf.get("hive.txn.valid.txns"))
+    jobConf.set("hive.txn.valid.txns",validTxnList)
     logDebug(s"HiveAcidRDD getPartitions, validWriteIds are: " + validWriteIds.writeToString())
-    logDebug(s"HiveAcidRDD getPartitions, JobConf is. Must contain hive.txn.valid.txns: " + jobConf.iterator().asScala
+    logDebug(s"HiveAcidRDD getPartitions, called before Computer.getPartitions. JobConf is. Must contain hive.txn.valid.txns: " + jobConf.iterator().asScala
       .map(entry => s"${entry.getKey} = ${entry.getValue}")
       .mkString("\n"))
     logDebug(s"HiveAcidRDD getPartitions. [KeyClass,ValueClass]" + keyClass.getCanonicalName +" "+ valueClass.getCanonicalName)

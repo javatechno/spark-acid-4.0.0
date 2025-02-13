@@ -400,15 +400,15 @@ extends CastSupport with SQLConfHelper with Reader with Logging {
     sparkSession.conf.set("spark.sql.hive.convertMetastoreOrc",value = false)
     sparkSession.conf.set("spark.sql.hive.convertMetastoreParquet",value = false)
     val validTxnList = sparkSession.conf.get("hive.txn.valid.txns")
-    sparkSession.sparkContext.getConf.set("hive.txn.valid.txns",validTxnList)
+//    sparkSession.sparkContext.getConf.set("hive.txn.valid.txns",validTxnList)
 
-    val configString: String = sparkSession.sparkContext.getConf.toDebugString
-    logDebug(s"HiveAcidRDD init: setting sparkSession.sparkContext key hive.txn.valid.txns. Result is:" +
-      s"sparkContext=$configString "
+    logDebug(s"HiveAcidRDD init: got key hive.txn.valid.txns. Result is:" +
+      s"validTxnList=$validTxnList "
     )
     val rdd = new HiveAcidRDD(
       sparkSession.sparkContext,
       validWriteIds,
+      validTxnList,
       hiveAcidOptions.isFullAcidTable,
       _broadcastedHadoopConf.asInstanceOf[Broadcast[SerializableConfiguration]],
       Some(initializeJobConfFunc),
@@ -416,7 +416,6 @@ extends CastSupport with SQLConfHelper with Reader with Logging {
       classOf[Writable],
       classOf[Writable],
       _minSplitsPerRDD)
-
     rdd
   }
 
