@@ -48,7 +48,7 @@ private[hiveacid] case class HiveAcidPartitionComputer(ignoreEmptySplits: Boolea
 
       // Log the concatenated configuration string using logDebug
       logDebug(s"Hive JobConf properties:\n$configString")
-      logWarning(s"HiveAcidPartitionComputer getPartitions jobconf id: "+ id)
+      logDebug(s"HiveAcidPartitionComputer getPartitions jobconf id: "+ id)
       val allInputSplits = inputFormat.getSplits(jobConf, minPartitions)
       val inputSplits = if (ignoreEmptySplits) {
         allInputSplits.filter(_.getLength > 0)
@@ -84,8 +84,8 @@ private[hiveacid] case class HiveAcidPartitionComputer(ignoreEmptySplits: Boolea
           broadcastedConf,
           shouldCloneJobConf,
           initLocalJobConfFuncOpt)
-        logWarning(s"computeHiveSplitsAndCache jobconf: "+ jobConf.toString)
-        logWarning(s"computeHiveSplitsAndCache jobconf txns: "+ jobConf.get("VALID_TXNS_KEY"))
+        logDebug(s"computeHiveSplitsAndCache jobconf: "+ jobConf.toString)
+        logDebug(s"computeHiveSplitsAndCache jobconf txns: "+ jobConf.get("VALID_TXNS_KEY"))
         val partitions = this.getPartitions[Writable, Writable](id, jobConf, getInputFormat(jobConf, ifcName), minPartitions)
         (partitions, FileInputFormat.getInputPaths(jobConf), validWriteIdList)
     }.collect()
