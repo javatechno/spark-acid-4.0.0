@@ -205,6 +205,7 @@ spAppendScalaVersion := true
 publishMavenStyle := true
 
 assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", "services", xs @ _*)   => MergeStrategy.last
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
   case _ => MergeStrategy.first
 }

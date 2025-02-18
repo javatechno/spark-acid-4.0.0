@@ -36,7 +36,8 @@ publishArtifact in (Compile, packageBin) := false
 
 val hive_version = sys.props.getOrElse("hive.version", "4.0.1")
 
-val orc_version = sys.props.getOrElse("orc.version", "1.5.6")
+// val orc_version = sys.props.getOrElse("orc.version", "1.5.6")
+val orc_version = sys.props.getOrElse("orc.version", "1.8.5")
 
 resolvers += "Additional Maven Repository" at sys.props.getOrElse("hive.repo", "https://repo1.maven.org/maven2/")
 
@@ -151,6 +152,7 @@ assemblyMergeStrategy in assembly := {
 				}
 			}
 		}
+	case PathList("META-INF", "services", xs @ _*) => distinctAndReplace
 	case PathList("META-INF", xs @ _*) => MergeStrategy.discard
 	// all discarded classes first
 	case PathList("javax", xs @ _*) => MergeStrategy.discard
@@ -193,7 +195,6 @@ assemblyMergeStrategy in assembly := {
 	// discard package.jdo because objects defined inside it are not shaded.
 	// So removing for now
 	case "package.jdo" => MergeStrategy.discard
-	case PathList("META-INF", "services", xs @ _*) => distinctAndReplace
 	case PathList("mozilla", "public-suffix-list.txt") => MergeStrategy.first
 	case PathList("META-INF", "versions", "17", "com", "fasterxml", "jackson", "core", "io", "doubleparser", "FastDoubleSwar.class") => MergeStrategy.discard
 	case PathList("META-INF", "versions", "21", "com", "fasterxml", "jackson", "core", "io", "doubleparser", "FastDoubleSwar.class") => MergeStrategy.discard
