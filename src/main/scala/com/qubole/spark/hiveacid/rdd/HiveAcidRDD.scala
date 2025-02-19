@@ -146,7 +146,7 @@ private[hiveacid] class HiveAcidRDD[K, V](sc: SparkContext,
   // Returns a JobConf that will be used on slaves to obtain input splits for Hadoop reads.
   protected def getJobConf: JobConf = {
     val conf: Configuration = broadcastedConf.value.value
-
+    conf.set("hive.txn.valid.txns", validTxnList)
     if (shouldCloneJobConf) {
       // Hadoop Configuration objects are not thread-safe, which may lead to various problems if
       // one job modifies a configuration while another reads it (SPARK-2546).  This problem occurs
@@ -161,18 +161,22 @@ private[hiveacid] class HiveAcidRDD[K, V](sc: SparkContext,
         if (!conf.isInstanceOf[JobConf]) {
           initLocalJobConfFuncOpt.foreach(f => f(newJobConf))
         }
+        newJobConf.set("hive.txn.valid.txns",validTxnList)
         newJobConf
       }
     } else {
       conf match {
         case c: JobConf =>
           logDebug("Re-using user-broadcasted JobConf")
+          c.set("hive.txn.valid.txns",validTxnList)
           c
         case _ =>
           Option(HiveAcidRDD.getCachedMetadata(jobConfCacheKey))
             .map { conf =>
               logDebug("Re-using cached JobConf")
-              conf.asInstanceOf[JobConf]
+              val jobconfCase = conf.asInstanceOf[JobConf]
+              jobconfCase.set("hive.txn.valid.txns",validTxnList)
+              jobconfCase
             }
             .getOrElse {
               // Create a JobConf that will be cached and used across this RDD's getJobConf() calls in
@@ -183,6 +187,7 @@ private[hiveacid] class HiveAcidRDD[K, V](sc: SparkContext,
               HiveAcidRDD.CONFIGURATION_INSTANTIATION_LOCK.synchronized {
                 logDebug("Creating new JobConf and caching it for later re-use")
                 val newJobConf = new JobConf(conf)
+                newJobConf.set("hive.txn.valid.txns",validTxnList)
                 initLocalJobConfFuncOpt.foreach(f => f(newJobConf))
                 HiveAcidRDD.putCachedMetadata(jobConfCacheKey, newJobConf)
                 newJobConf
@@ -199,6 +204,7 @@ private[hiveacid] class HiveAcidRDD[K, V](sc: SparkContext,
   }
 
   protected def getInputFormat(conf: JobConf): InputFormat[K, V] = {
+    conf.set("hive.txn.valid.txns",validTxnList)
     val newInputFormat = ReflectionUtils.newInstance(inputFormatClass.asInstanceOf[Class[_]], conf)
       .asInstanceOf[InputFormat[K, V]]
     newInputFormat match {
@@ -209,10 +215,12 @@ private[hiveacid] class HiveAcidRDD[K, V](sc: SparkContext,
   }
 
   override def getPartitions: Array[Partition] = {
-    val jobConf: JobConf = HiveAcidRDD.setInputPathToJobConf(Some(getJobConf), isFullAcidTable, validWriteIds,
-      broadcastedConf, shouldCloneJobConf, initLocalJobConfFuncOpt)
-    jobConf.set("hive.txn.valid.txns",validTxnList)
     logDebug(s"HiveAcidRDD getPartitions, validWriteIds are: " + validWriteIds.writeToString())
+    val tempConf = Some(getJobConf).get
+    tempConf.set("hive.txn.valid.txns",validTxnList)
+    logDebug(s"HiveAcidRDD getPartitions, set tempConf.validWriteIds. Theywill be used in setInputPathToJobConf: " + validWriteIds.writeToString())
+    val jobConf: JobConf = HiveAcidRDD.setInputPathToJobConf(Some(getJobConf), isFullAcidTable, validWriteIds,
+      broadcastedConf, shouldCloneJobConf, initLocalJobConfFuncOpt, validTxnList)
     logDebug(s"HiveAcidRDD getPartitions, called before Computer.getPartitions. JobConf is. Must contain hive.txn.valid.txns: " + jobConf.iterator().asScala
       .map(entry => s"${entry.getKey} = ${entry.getValue}")
       .mkString("\n"))
@@ -401,7 +409,6 @@ object HiveAcidRDD extends Logging {
                                                                f: (InputSplit, Iterator[T]) => Iterator[U],
                                                                preservesPartitioning: Boolean = false)
     extends RDD[U](prev) {
-
     override val partitioner: Option[Partitioner] = if (preservesPartitioning) firstParent[T].partitioner else None
 
     override def getPartitions: Array[Partition] = firstParent[T].partitions
@@ -434,7 +441,8 @@ object HiveAcidRDD extends Logging {
   // Returns a JobConf that will be used on slaves to obtain input splits for Hadoop reads.
   private[hiveacid] def getJobConf(broadcastedConf: Broadcast[SerializableConfiguration],
                            shouldCloneJobConf: Boolean,
-                           initLocalJobConfFuncOpt: Option[JobConf => Unit]): JobConf = {
+                           initLocalJobConfFuncOpt: Option[JobConf => Unit],
+                                   validTxnList: String): JobConf = {
     val conf: Configuration = broadcastedConf.value.value
     if (shouldCloneJobConf) {
       // Hadoop Configuration objects are not thread-safe, which may lead to various problems if
@@ -450,12 +458,14 @@ object HiveAcidRDD extends Logging {
         if (!conf.isInstanceOf[JobConf]) {
           initLocalJobConfFuncOpt.foreach(f => f(newJobConf))
         }
+        newJobConf.set("hive.txn.valid.txns",validTxnList)
         newJobConf
       }
     } else {
       conf match {
         case c: JobConf =>
           logDebug("Re-using user-broadcasted JobConf")
+          c.set("hive.txn.valid.txns",validTxnList)
           c
         case _ =>
           // Create a JobConf that will be cached and used across this RDD's getJobConf() calls in
@@ -467,6 +477,7 @@ object HiveAcidRDD extends Logging {
             logDebug("Creating new JobConf and caching it for later re-use")
             val newJobConf = new JobConf(conf)
             initLocalJobConfFuncOpt.foreach(f => f(newJobConf))
+            newJobConf.set("hive.txn.valid.txns",validTxnList)
             newJobConf
           }
       }
@@ -478,12 +489,13 @@ object HiveAcidRDD extends Logging {
                             validWriteIds: ValidWriteIdList,
                             broadcastedConf: Broadcast[SerializableConfiguration],
                             shouldCloneJobConf: Boolean,
-                            initLocalJobConfFuncOpt: Option[JobConf => Unit]): JobConf = {
+                            initLocalJobConfFuncOpt: Option[JobConf => Unit],
+                            validTxnList: String): JobConf = {
+    logDebug("Goint to set input path to job conf. Valid txn list is: " + validTxnList)
     var jobConf = jobConfOpt match {
       case Some(jobConf) => jobConf
-      case None => getJobConf(broadcastedConf, shouldCloneJobConf, initLocalJobConfFuncOpt)
+      case None => getJobConf(broadcastedConf, shouldCloneJobConf, initLocalJobConfFuncOpt, validTxnList)
     }
-
     if (isFullAcidTable) {
       // If full ACID table, just set the right writeIds, the
       // OrcInputFormat.getSplits() will take care of the rest

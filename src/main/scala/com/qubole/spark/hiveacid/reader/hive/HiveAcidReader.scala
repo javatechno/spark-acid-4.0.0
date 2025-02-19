@@ -221,6 +221,9 @@ extends CastSupport with SQLConfHelper with Reader with Logging {
         mutableRowRecordIds,
         deserializer)
     }
+    val validTxnList = sparkSession.conf.get("hive.txn.valid.txns")
+    sparkSession.sparkContext.getConf.set("hive.txn.valid.txns",validTxnList)
+    logDebug("HiveAcidReader deserializeTableRdd. Trying to get validTxnList from sparkContext.getConf: " + sparkSession.sparkContext.getConf.get("hive.txn.valid.txns",""))
     new HiveAcidUnionRDD[InternalRow](sparkSession.sparkContext, Seq(deserializedHiveRDD), Seq())
   }
 
@@ -263,6 +266,10 @@ extends CastSupport with SQLConfHelper with Reader with Logging {
       new EmptyRDD[InternalRow](sparkSession.sparkContext)
     } else {
       val hiveSplitInfos = hivePartitionRDDSeq.map(_._4)
+      val validTxnList = sparkSession.conf.get("hive.txn.valid.txns")
+      sparkSession.sparkContext.getConf.set("hive.txn.valid.txns",validTxnList)
+      hivePartitionRDDs.head.context.getConf.set("hive.txn.valid.txns",validTxnList)
+      logDebug("HiveAcidReader makeRDDForPartitionedTable. Trying to get validTxnList from sparkContext.getConf: " + sparkSession.sparkContext.getConf.get("hive.txn.valid.txns",""))
       new HiveAcidUnionRDD[InternalRow](hivePartitionRDDs.head.context, hivePartitionRDDs, hiveSplitInfos)
     }
   }

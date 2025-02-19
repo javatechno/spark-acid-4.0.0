@@ -60,7 +60,9 @@ private[hiveacid] class HiveAcidUnionRDD[T: ClassTag](
       val hiveSplitRDD = super.sparkContext.parallelize(hiveSplitInfo, partitions)
       val hiveAcidPartitionComputer = new HiveAcidPartitionComputer(ignoreEmptySplits, ignoreMissingFiles)
       // It spawns a spark job to compute Partitions for every RDD and stores it in cache.
-      hiveAcidPartitionComputer.computeHiveSplitsAndCache(hiveSplitRDD)
+      logDebug("HiveAcidUnionRDD. Trying to get validTxnList from sparkContext.getConf: " + sc.getConf.get("hive.txn.valid.txns",""))
+      val validTxnList = sc.getConf.get("hive.txn.valid.txns","")
+      hiveAcidPartitionComputer.computeHiveSplitsAndCache(hiveSplitRDD, validTxnList)
     }
     super.getPartitions
   }

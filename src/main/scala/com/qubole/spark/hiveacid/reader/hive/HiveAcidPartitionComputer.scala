@@ -70,20 +70,20 @@ private[hiveacid] case class HiveAcidPartitionComputer(ignoreEmptySplits: Boolea
   }
 
   // needs to be invoked just once as its an expensive operation.
-  def computeHiveSplitsAndCache(splitRDD: RDD[HiveSplitInfo]): Unit = {
+  def computeHiveSplitsAndCache(splitRDD: RDD[HiveSplitInfo], validTxnList: String): Unit = {
     val start = System.nanoTime()
     logInfo("Spawning job to compute partitions for ACID table RDD")
-
+    logDebug("HiveAcidUnionRDD computeHiveSplitsAndCache. Trying to get validTxnList from sparkContext.getConf: " + validTxnList)
     val splits = splitRDD.map {
       case HiveSplitInfo(id, broadcastedConf,
       validWriteIdList, minPartitions, ifcName, isFullAcidTable, shouldCloneJobConf, initLocalJobConfFuncOpt) =>
         val jobConf = HiveAcidRDD.setInputPathToJobConf(
-          Some(HiveAcidRDD.getJobConf(broadcastedConf, shouldCloneJobConf, initLocalJobConfFuncOpt)),
+          Some(HiveAcidRDD.getJobConf(broadcastedConf, shouldCloneJobConf, initLocalJobConfFuncOpt,validTxnList)),
           isFullAcidTable,
           new ValidReaderWriteIdList(validWriteIdList),
           broadcastedConf,
           shouldCloneJobConf,
-          initLocalJobConfFuncOpt)
+          initLocalJobConfFuncOpt,validTxnList)
         logDebug(s"computeHiveSplitsAndCache jobconf: "+ jobConf.toString)
         logDebug(s"computeHiveSplitsAndCache jobconf txns: "+ jobConf.get("VALID_TXNS_KEY"))
         val partitions = this.getPartitions[Writable, Writable](id, jobConf, getInputFormat(jobConf, ifcName), minPartitions)
