@@ -147,6 +147,7 @@ private[hiveacid] class HiveAcidRDD[K, V](sc: SparkContext,
   protected def getJobConf: JobConf = {
     val conf: Configuration = broadcastedConf.value.value
     val fixValidTxnList = Option(validTxnList).getOrElse("")
+    logDebug(s"protected getJobConf called. fixValidTxnList: " + fixValidTxnList)
     if (shouldCloneJobConf) {
       // Hadoop Configuration objects are not thread-safe, which may lead to various problems if
       // one job modifies a configuration while another reads it (SPARK-2546).  This problem occurs
@@ -217,7 +218,7 @@ private[hiveacid] class HiveAcidRDD[K, V](sc: SparkContext,
     val fixValidTxnList = Option(validTxnList).getOrElse("")
     logDebug(s"HiveAcidRDD getPartitions, validWriteIds are: " + fixValidTxnList)
     val tempConf = Some(getJobConf).get
-    tempConf.set("hive.txn.valid.txns",fixValidTxnList,"")
+    tempConf.set("hive.txn.valid.txns",fixValidTxnList)
     logDebug(s"HiveAcidRDD getPartitions, set tempConf.validWriteIds. Theywill be used in setInputPathToJobConf: " + validWriteIds.writeToString())
     val jobConf: JobConf = HiveAcidRDD.setInputPathToJobConf(Some(getJobConf), isFullAcidTable, validWriteIds,
       broadcastedConf, shouldCloneJobConf, initLocalJobConfFuncOpt, fixValidTxnList)
@@ -445,6 +446,7 @@ object HiveAcidRDD extends Logging {
                                    validTxnList: String): JobConf = {
     val conf: Configuration = broadcastedConf.value.value
     val fixValidTxnList: String = Option(validTxnList).getOrElse("")
+    logDebug(s"static getJobConf called. fixValidTxnList: " + fixValidTxnList)
     if (shouldCloneJobConf) {
       // Hadoop Configuration objects are not thread-safe, which may lead to various problems if
       // one job modifies a configuration while another reads it (SPARK-2546).  This problem occurs

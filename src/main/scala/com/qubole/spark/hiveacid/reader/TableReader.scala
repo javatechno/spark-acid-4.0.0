@@ -19,16 +19,15 @@
 
 package com.qubole.spark.hiveacid.reader
 
-import com.qubole.spark.hiveacid.{HiveAcidOperation, SparkAcidConf}
-import com.qubole.spark.hiveacid.transaction._
 import com.qubole.spark.hiveacid.hive.HiveAcidMetadata
 import com.qubole.spark.hiveacid.reader.hive.{HiveAcidReader, HiveAcidReaderOptions}
-
+import com.qubole.spark.hiveacid.transaction._
+import com.qubole.spark.hiveacid.{HiveAcidOperation, SparkAcidConf}
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.sources.Filter
+import org.apache.spark.sql.{Row, SparkSession}
 
 /**
   * Table reader object
@@ -123,13 +122,17 @@ private[hiveacid] class TableReader(sparkSession: SparkSession,
       s"hiveAcidReaderOptions=${hiveAcidReaderOptions.toString}, " +
       s"validWriteIds=${validWriteIds.writeToString()}, "
     )
-    sparkSession.conf.set("hive.txn.valid.txns", validTxnList.writeToString())
-    sparkSession.sessionState.conf.setConfString("hive.txn.valid.txns", validTxnList.writeToString())
+    sparkSession.conf.set("hive.txn.valid.txns", Option(validTxnList.writeToString()).getOrElse(""))
+    sparkSession.sessionState.conf.setConfString("hive.txn.valid.txns", Option(validTxnList.writeToString()).getOrElse(""))
+    val test = if (validTxnList.writeToString().isEmpty) "" else validTxnList.writeToString()
+    logDebug(s"TableReader init. Setting HiveAcidReader with: " + test)
     val reader = new HiveAcidReader(
       sparkSession,
       readerOptions,
       hiveAcidReaderOptions,
-      validWriteIds)
+      validWriteIds,
+      if (validTxnList.writeToString().isEmpty) "" else validTxnList.writeToString()
+    )
 
     val rdd = if (hiveAcidMetadata.isPartitioned) {
       reader.makeRDDForPartitionedTable(hiveAcidMetadata, partitions)
