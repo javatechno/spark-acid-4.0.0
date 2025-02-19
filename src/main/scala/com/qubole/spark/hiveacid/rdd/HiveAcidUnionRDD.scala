@@ -43,7 +43,8 @@ private[hiveacid] class HiveAcidUnionRDD[T: ClassTag](
    sc: SparkContext,
    rddSeq: Seq[RDD[T]],
    //TODO: We should clean so that HiveSplitInfo need not have to be passed separately.
-   hiveSplitInfo: Seq[HiveSplitInfo]) extends UnionRDD[T](sc, rddSeq) {
+   hiveSplitInfo: Seq[HiveSplitInfo],
+   validTxnList: String) extends UnionRDD[T](sc, rddSeq) {
 
   private val ignoreMissingFiles =
     super.sparkContext.getConf.getBoolean("spark.files.ignoreMissingFiles", defaultValue = false)
@@ -60,8 +61,8 @@ private[hiveacid] class HiveAcidUnionRDD[T: ClassTag](
       val hiveSplitRDD = super.sparkContext.parallelize(hiveSplitInfo, partitions)
       val hiveAcidPartitionComputer = new HiveAcidPartitionComputer(ignoreEmptySplits, ignoreMissingFiles)
       // It spawns a spark job to compute Partitions for every RDD and stores it in cache.
-      logDebug("HiveAcidUnionRDD. Trying to get validTxnList from sparkContext.getConf: " + sc.getConf.get("hive.txn.valid.txns",""))
-      val validTxnList = sc.getConf.get("hive.txn.valid.txns","")
+      logDebug("HiveAcidUnionRDD. Trying to get validTxnList from constructor: " + validTxnList)
+//      val validTxnList = sc.getConf.get("hive.txn.valid.txns","")
       hiveAcidPartitionComputer.computeHiveSplitsAndCache(hiveSplitRDD, validTxnList)
     }
     super.getPartitions
