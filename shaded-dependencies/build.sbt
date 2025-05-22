@@ -44,7 +44,7 @@ resolvers += "Additional Maven Repository" at sys.props.getOrElse("hive.repo", "
 // Shaded dependency
 libraryDependencies ++= Seq(
 	// Hive/Orc core dependencies packed.
-	"org.apache.hive" % "hive-metastore" % hive_version intransitive(),
+	"org.apache.hive" % "hive-standalone-metastore" % hive_version intransitive(),
 	"org.apache.hive" % "hive-exec" % hive_version intransitive(),
 	"org.apache.orc" % "orc-core" % orc_version intransitive(),
 	"org.apache.orc" % "orc-mapreduce" % orc_version intransitive(),
@@ -196,6 +196,10 @@ assemblyMergeStrategy in assembly := {
 	// So removing for now
 	case "package.jdo" => MergeStrategy.discard
 	case PathList("mozilla", "public-suffix-list.txt") => MergeStrategy.first
+	case PathList("org", "threeten","extra","chrono","HybridChronology$1.class") => MergeStrategy.first
+	case PathList("org", "threeten","extra","chrono","HybridChronology.class") => MergeStrategy.first
+	case PathList("org", "threeten","extra","chrono","HybridDate$1.class") => MergeStrategy.first
+	case PathList("org", "threeten","extra","chrono","HybridDate.class") => MergeStrategy.first
 	case PathList("META-INF", "versions", "17", "com", "fasterxml", "jackson", "core", "io", "doubleparser", "FastDoubleSwar.class") => MergeStrategy.discard
 	case PathList("META-INF", "versions", "21", "com", "fasterxml", "jackson", "core", "io", "doubleparser", "FastDoubleSwar.class") => MergeStrategy.discard
 	case PathList("META-INF", "versions", "17", "com", "fasterxml", "jackson", "core", "io", "doubleparser", "FastIntegerMath.class") => MergeStrategy.discard

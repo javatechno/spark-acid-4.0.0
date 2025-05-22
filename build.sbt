@@ -137,7 +137,7 @@ libraryDependencies ++= Seq(
   "org.apache.hive" % "hive-common" % "4.0.1" % "test",
   "org.apache.hive" % "hive-serde" % "4.0.1" % "test",
 //  "org.apache.hive" % "hive-exec" % "3.1.0" % "test",
-  "org.apache.hive" % "hive-metastore" % "4.0.1" % "test",
+  "org.apache.hive" % "hive-standalone-metastore" % "4.0.1" % "test",
 
   // https://mvnrepository.com/artifact/com.dimafeng/testcontainers-scala
   "com.dimafeng" %% "testcontainers-scala" % "0.41.4" % Test,
